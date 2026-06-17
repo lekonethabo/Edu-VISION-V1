@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Edu-VISION Statistics Portal v2.7",
+  "description": "A highly responsive and responsive web portal for educational statistics, including standard enrolment, teaching staff, facilities tracking, and AI-powered statistical analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

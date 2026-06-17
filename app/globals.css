@@ -1,0 +1,199 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-prussian: #002652;
+  --color-snow: #F7FAFC;
+  --color-golden: #97620C;
+  --color-seagreen: #00A3A3;
+  --color-sea: #00A3A3;
+  --color-ink: #000A14;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Overriding standard Tailwind palettes to stick strictly to the branding */
+  
+  /* Blue and Purple map to Prussian Blue scale */
+  --color-blue-50: #f0f4f8;
+  --color-blue-100: #d0e1f0;
+  --color-blue-200: #abc9e6;
+  --color-blue-300: #81aed6;
+  --color-blue-400: #5992c6;
+  --color-blue-500: #3b74a8;
+  --color-blue-600: #002652; /* Prussian Blue */
+  --color-blue-700: #001c3e;
+  --color-blue-800: #001229;
+  --color-blue-900: #000914;
+  --color-blue-950: #000A14; /* Ink Black */
+
+  --color-purple-50: var(--color-blue-50);
+  --color-purple-100: var(--color-blue-100);
+  --color-purple-200: var(--color-blue-200);
+  --color-purple-300: var(--color-blue-300);
+  --color-purple-400: var(--color-blue-400);
+  --color-purple-500: var(--color-blue-500);
+  --color-purple-600: var(--color-blue-600);
+  --color-purple-700: var(--color-blue-700);
+  --color-purple-800: var(--color-blue-800);
+  --color-purple-900: var(--color-blue-900);
+  --color-purple-950: var(--color-blue-950);
+
+  --color-indigo-50: var(--color-blue-50);
+  --color-indigo-100: var(--color-blue-100);
+  --color-indigo-200: var(--color-blue-200);
+  --color-indigo-300: var(--color-blue-300);
+  --color-indigo-400: var(--color-blue-400);
+  --color-indigo-500: var(--color-blue-500);
+  --color-indigo-600: var(--color-blue-600);
+  --color-indigo-700: var(--color-blue-700);
+  --color-indigo-800: var(--color-blue-800);
+  --color-indigo-900: var(--color-blue-900);
+  --color-indigo-950: var(--color-blue-950);
+
+  /* Emerald, Green, Teal map to Light Sea Green scale */
+  --color-emerald-50: #e6f6f6;
+  --color-emerald-100: #b3e3e3;
+  --color-emerald-200: #80cfcf;
+  --color-emerald-300: #4dbdbd;
+  --color-emerald-400: #26aead;
+  --color-emerald-500: #009191;
+  --color-emerald-600: #00A3A3; /* Sea Green */
+  --color-emerald-700: #008282;
+  --color-emerald-800: #006262;
+  --color-emerald-900: #004141;
+  --color-emerald-950: #002121;
+  
+  --color-green-50: var(--color-emerald-50);
+  --color-green-100: var(--color-emerald-100);
+  --color-green-200: var(--color-emerald-200);
+  --color-green-300: var(--color-emerald-300);
+  --color-green-400: var(--color-emerald-400);
+  --color-green-500: var(--color-emerald-500);
+  --color-green-600: var(--color-emerald-600);
+  --color-green-700: var(--color-emerald-700);
+  --color-green-800: var(--color-emerald-800);
+  --color-green-900: var(--color-emerald-900);
+  --color-green-950: var(--color-emerald-950);
+
+  --color-teal-50: var(--color-emerald-50);
+  --color-teal-100: var(--color-emerald-100);
+  --color-teal-200: var(--color-emerald-200);
+  --color-teal-300: var(--color-emerald-300);
+  --color-teal-400: var(--color-emerald-400);
+  --color-teal-500: var(--color-emerald-500);
+  --color-teal-600: var(--color-emerald-600);
+  --color-teal-700: var(--color-emerald-700);
+  --color-teal-800: var(--color-emerald-800);
+  --color-teal-900: var(--color-emerald-900);
+  --color-teal-950: var(--color-emerald-950);
+
+  /* Amber, Yellow map to Golden Earth scale */
+  --color-amber-50: #f5efe6;
+  --color-amber-100: #e1d2ba;
+  --color-amber-200: #cdb58e;
+  --color-amber-300: #ba9862;
+  --color-amber-400: #ab8240;
+  --color-amber-500: #97620C; /* Golden Earth */
+  --color-amber-600: #794e0a; 
+  --color-amber-700: #5b3b07;
+  --color-amber-800: #3c2705;
+  --color-amber-900: #1e1302;
+  --color-amber-950: #0f0a01;
+
+  --color-yellow-50: var(--color-amber-50);
+  --color-yellow-100: var(--color-amber-100);
+  --color-yellow-200: var(--color-amber-200);
+  --color-yellow-300: var(--color-amber-300);
+  --color-yellow-400: var(--color-amber-400);
+  --color-yellow-500: var(--color-amber-500);
+  --color-yellow-600: var(--color-amber-600);
+  --color-yellow-700: var(--color-amber-700);
+  --color-yellow-800: var(--color-amber-800);
+  --color-yellow-900: var(--color-amber-900);
+  --color-yellow-950: var(--color-amber-950);
+
+  /* Rose and Red map to a distinct Terracotta to complement Sea Green & Golden, strictly tied to palette */
+  --color-rose-50: #f6e9e6;
+  --color-rose-100: #e9c8bf;
+  --color-rose-200: #dda699;
+  --color-rose-300: #cf8472;
+  --color-rose-400: #c46a55;
+  --color-rose-500: #b54930; 
+  --color-rose-600: #913a26; 
+  --color-rose-700: #6d2c1d;
+  --color-rose-800: #481d13;
+  --color-rose-900: #240f09;
+  --color-rose-950: #120705;
+
+  --color-red-50: var(--color-rose-50);
+  --color-red-100: var(--color-rose-100);
+  --color-red-200: var(--color-rose-200);
+  --color-red-300: var(--color-rose-300);
+  --color-red-400: var(--color-rose-400);
+  --color-red-500: var(--color-rose-500);
+  --color-red-600: var(--color-rose-600);
+  --color-red-700: var(--color-rose-700);
+  --color-red-800: var(--color-rose-800);
+  --color-red-900: var(--color-rose-900);
+  --color-red-950: var(--color-rose-950);
+
+  /* Slate maps softly between Snow and Ink */
+  --color-slate-50: #F7FAFC; /* Bright Snow */
+  --color-slate-100: #e9eff5;
+  --color-slate-200: #cfdde6;
+  --color-slate-300: #b5cbd8;
+  --color-slate-400: #9cb9c9;
+  --color-slate-500: #82a8ba;
+  --color-slate-600: #57788c;
+  --color-slate-700: #3a5c6e;
+  --color-slate-800: #1d3340;
+  --color-slate-900: #000A14; /* Ink Black */
+  --color-slate-950: #00050A;
+}
+
+/* Strict government portal typographic layout rules */
+:root {
+  --font-sans: 'Inter', sans-serif;
+}
+
+/* Ensure Inter is used across all UI layers and components */
+html, body, button, input, select, textarea, div, span, p, table, th, td, h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Neutralize playful/non-governmental serif fonts */
+.font-serif, .font-display {
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* Terminate playful or cursive italics across institutional screens */
+.italic, i, em {
+  font-style: normal !important;
+}
+
+/* Set up professional, flat, clean borders and crisp scrollbars representing MoE standards */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+/* Remove number input spinners */
+input[type="number"]::-webkit-inner-spin-button, 
+input[type="number"]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}

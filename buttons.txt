@@ -1,0 +1,421 @@
+2282:            <button onClick={() => setAlert(null)} className="ml-2 hover:opacity-75 focus:outline-none">
+2283-              <X className="w-4 h-4" />
+2284-            </button>
+--
+2342:              <button
+2343-                onClick={toggleTheme}
+2344-                className={`p-2 rounded-full border cursor-pointer ${
+--
+2427:                  <button 
+2428-                    onClick={() => setAuthMode("login")}
+2429-                    className={`flex-1 py-2 rounded-lg cursor-pointer transition-all ${
+--
+2433:                  <button 
+2434-                    onClick={() => setAuthMode("signup")}
+2435-                    className={`flex-1 py-2 rounded-lg cursor-pointer transition-all ${
+--
+2487:                  <button 
+2488-                    type="submit"
+2489-                    className="w-full bg-[#4CAD73] text-white py-3.5 rounded-xl font-bold hover:bg-[#3FA05B] transition-all cursor-pointer flex items-center justify-center gap-2 mt-2 shadow-md shadow-[#4CAD73]/10"
+--
+2506:                  <button
+2507-                    onClick={handleBypassAuth}
+2508-                    className="w-full text-sm px-4 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-[#161D12] text-slate-800 dark:text-neutral-100 placeholder-[#A1A89B] dark:placeholder-[#767E6E] focus:outline-none focus:ring-2 focus:ring-[#4CAD73]/40 focus:border-[#4CAD73] transition-all"
+--
+2564:                <button
+2565-                  onClick={toggleTheme}
+2566-                  className={`p-2 rounded-full border cursor-pointer transition-colors ${
+--
+2574:                <button
+2575-                  onClick={handleLogout}
+2576-                  className="text-xs px-3.5 py-2 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all font-semibold"
+--
+2637:                    <button disabled className="text-xs font-bold py-2 px-4 rounded-xl bg-slate-100 dark:bg-neutral-800/40 text-slate-400 dark:text-neutral-500 cursor-not-allowed">
+2638-                      Offline Standby
+2639-                    </button>
+--
+2681:                    <button 
+2682-                      onClick={() => selectTool("primary")}
+2683-                      className="text-xs font-bold py-2 px-4 rounded-xl bg-[#4CAD73] hover:bg-[#3FA05B] text-white cursor-pointer transition-all flex items-center gap-1.5 shadow-md shadow-[#4CAD73]/20"
+--
+2723:                    <button disabled className="text-xs font-bold py-2 px-4 rounded-xl bg-slate-100 dark:bg-neutral-800/40 text-slate-400 dark:text-neutral-500 cursor-not-allowed">
+2724-                      Offline Standby
+2725-                    </button>
+--
+2761:                    <button disabled className="text-xs font-bold py-2 px-4 rounded-xl bg-slate-100 dark:bg-neutral-800/40 text-slate-400 dark:text-neutral-500 cursor-not-allowed">
+2762-                      Offline Standby
+2763-                    </button>
+--
+2799:                    <button disabled className="text-xs font-bold py-2 px-4 rounded-xl bg-slate-100 dark:bg-neutral-800/40 text-slate-400 dark:text-neutral-500 cursor-not-allowed">
+2800-                      Offline Standby
+2801-                    </button>
+--
+2856:              <button 
+2857-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+2858-                className="md:hidden p-1 rounded-md hover:bg-white/10"
+--
+2865:            <button
+2866-              onClick={() => selectTool(null)}
+2867-              className="w-full mb-6 flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl border border-dashed border-[#4CAD73]/40 text-xs font-bold text-[#4CAD73] hover:bg-[#4CAD73]/10 transition-all focus:outline-none cursor-pointer group"
+--
+2880:                    <button
+2881-                      onClick={() => { setActiveTab("dashboard"); setMobileMenuOpen(false); }}
+2882-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${
+--
+2922:                        <button
+2923-                          onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }}
+2924-                          className={`w-full flex items-center gap-3 px-3 py-2 text-xs font-bold transition-all ${
+--
+2944:                    <button
+2945-                      onClick={() => { setActiveTab("analytics"); setMobileMenuOpen(false); }}
+2946-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${
+--
+2972:                  <button
+2973-                    onClick={handleLogout}
+2974-                    className="w-full text-sm px-4 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-[#161D12] text-slate-800 dark:text-neutral-100 placeholder-[#A1A89B] dark:placeholder-[#767E6E] focus:outline-none focus:ring-2 focus:ring-[#4CAD73]/40 focus:border-[#4CAD73] transition-all"
+--
+3018:                <button
+3019-                  onClick={handleExportData}
+3020-                  className="px-4 py-1.5 rounded-full text-xs font-bold bg-[#1D2616] text-white hover:bg-[#4CAD73] transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm shadow-black/10 focus:outline-none"
+--
+3028:                <button
+3029-                  onClick={toggleTheme}
+3030-                  className={`p-2 rounded-full border cursor-pointer ${
+--
+3061:                        <button 
+3062-                          onClick={() => setActiveTab("analytics")}
+3063-                          className="bg-[#1D2616] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#4CAD73] transition-colors focus:outline-none flex items-center gap-1.5 cursor-pointer"
+--
+3068:                        <button 
+3069-                          onClick={() => setActiveTab("school")}
+3070-                          className="bg-white/80 dark:bg-[#1C2417] text-xs font-semibold hover:bg-white dark:hover:bg-[#1D2616]/70 px-4 py-2 rounded-xl border border-slate-200 dark:border-[#2D3A24] cursor-pointer"
+--
+3185:                          <button
+3186-                            onClick={() => setCensusViewMode("matrix")}
+3187-                            className={`px-4 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+--
+3195:                          <button
+3196-                            onClick={() => setCensusViewMode("overview")}
+3197-                            className={`px-4 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+--
+3231:                        <button
+3232-                          onClick={() => {
+3233-                            let csvContent = "data:text/csv;charset=utf-8,";
+--
+4091:                    <button
+4092-                      onClick={openNewStudentForm}
+4093-                      className="bg-[#4CAD73] text-white text-xs font-bold px-5 py-2.5 rounded-full hover:bg-[#3FA05B] transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none shadow-md shadow-[#4CAD73]/10"
+--
+4109:                        <button onClick={() => setIsAddingStudent(false)} className="hover:opacity-75 focus:outline-none">
+4110-                          <X className="w-4 h-4" />
+4111-                        </button>
+--
+4318:                                    <button
+4319-                                      key={status}
+4320-                                      type="button"
+--
+4340:                                <button
+4341-                                  type="button"
+4342-                                  onClick={() => setStudentForm({ ...studentForm, social: [] })}
+--
+4364:                                    <button
+4365-                                      key={supportOpt}
+4366-                                      type="button"
+--
+4387:                                <button
+4388-                                  type="button"
+4389-                                  onClick={() => setStudentForm({ ...studentForm, supportOvc: ["NONE"] })}
+--
+4448:                                        <button
+4449-                                          key={sendOpt}
+4450-                                          type="button"
+--
+4488:                                        <button
+4489-                                          key={srv}
+4490-                                          type="button"
+--
+4511:                                    <button
+4512-                                      type="button"
+4513-                                      onClick={() => setStudentForm({ ...studentForm, supportServicesSend: ["NONE"] })}
+--
+4531:                        <button 
+4532-                          onClick={() => setIsAddingStudent(false)}
+4533-                          className="px-4 py-2 rounded-xl text-xs font-semibold bg-neutral-200 dark:bg-neutral-800 text-[#5C5A52] focus:outline-none"
+--
+4537:                        <button 
+4538-                          onClick={handleSaveStudent}
+4539-                          className="px-5 py-2 rounded-xl text-xs font-bold bg-[#4CAD73] text-white hover:bg-[#3FA05B]"
+--
+4702:                                    <button 
+4703-                                      onClick={() => setSelectedStudentForView(st)}
+4704-                                      className="p-1.5 rounded-lg hover:bg-[#4CAD73]/10 text-[#4CAD73] focus:outline-none relative"
+--
+4709:                                    <button 
+4710-                                      onClick={() => openEditStudentForm(st)}
+4711-                                      className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-neutral-800 text-[#4CAD73] focus:outline-none"
+--
+4716:                                    <button 
+4717-                                      onClick={() => handleDeleteStudent(st.id)}
+4718-                                      className="p-1.5 rounded-lg hover:bg-rose-500/10 text-rose-500 focus:outline-none"
+--
+4749:                    <button
+4750-                      onClick={openNewTeacherForm}
+4751-                      className="bg-[#4CAD73] text-white text-xs font-bold px-4 py-2.5 rounded-full hover:bg-[#3FA05B] flex items-center gap-1.5 cursor-pointer focus:outline-none"
+--
+4762:                        <button onClick={() => setIsAddingTeacher(false)} className="hover:opacity-75"><X className="w-4 h-4" /></button>
+4763-                      </div>
+4764-
+--
+5090:                        <button onClick={() => setIsAddingTeacher(false)} className="px-4 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 text-slate-800 dark:text-neutral-200">Cancel</button>
+5091:                        <button onClick={handleSaveTeacher} className="px-5 py-2 rounded-xl bg-[#4CAD73] text-white">Save</button>
+5092-                      </div>
+5093-                    </div>
+--
+5146:                            <button
+5147-                              onClick={() => {
+5148-                                setTeacherSearch("");
+--
+5447:                                          <button onClick={() => openEditTeacherForm(t)} className="p-1.5 hover:bg-slate-100 text-[#4CAD73]" title="Edit Profile"><Edit className="w-3.5 h-3.5" /></button>
+5448:                                          <button onClick={() => handleDeleteTeacher(t.id)} className="p-1.5 hover:bg-rose-500/10 text-rose-500" title="Delete record"><Trash2 className="w-3.5 h-3.5" /></button>
+5449-                                        </div>
+5450-                                      </td>
+--
+5473:                    <button
+5474-                      onClick={openNewProgrammeForm}
+5475-                      className="bg-[#4CAD73] hover:bg-[#3FA05B] text-white text-xs font-bold px-4 py-2.5 rounded-full flex items-center gap-1.5 cursor-pointer focus:outline-none transition-colors"
+--
+5486:                        <button onClick={() => setIsAddingProgramme(false)} className="hover:opacity-75"><X className="w-4 h-4" /></button>
+5487-                      </div>
+5488-
+--
+5591:                        <button type="button" onClick={() => setIsAddingProgramme(false)} className="px-4 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-slate-800 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 transition-colors">Cancel</button>
+5592:                        <button 
+5593-                          type="button"
+5594-                          onClick={handleSaveProgramme}
+--
+5670:                                <button onClick={() => handleDeleteProgramme(programme.id)} className="text-[#E74C3C] hover:opacity-75 focus:outline-none cursor-pointer p-1.5"><Trash2 className="w-4 h-4 text-rose-500 inline" /></button>
+5671-                              </td>
+5672-                            </tr>
+--
+5721:                      <button
+5722-                        onClick={openNewSupportForm}
+5723-                        className="bg-[#4CAD73] text-white text-xs font-bold px-4 py-2.5 rounded-full hover:bg-[#3FA05B] flex items-center gap-1.5 cursor-pointer focus:outline-none whitespace-nowrap"
+--
+5738:                        <button onClick={() => setIsAddingSupport(false)} className="hover:opacity-75"><X className="w-4 h-4" /></button>
+5739-                      </div>
+5740-
+--
+6004:                        <button onClick={() => setIsAddingSupport(false)} className="px-5 py-2.5 rounded-full bg-neutral-200 dark:bg-neutral-800 text-slate-800 dark:text-neutral-200 font-bold hover:opacity-80 transition-all">Cancel</button>
+6005:                        <button onClick={handleSaveSupport} className="px-6 py-2.5 rounded-full bg-[#4CAD73] text-white font-bold hover:bg-[#3FA05B] transition-all">Save support profile</button>
+6006-                      </div>
+6007-                    </div>
+--
+6108:                                  <button onClick={() => openEditSupportForm(s)} className="p-1.5 rounded-full hover:bg-[#4CAD73]/10 text-[#4CAD73]"><Edit className="w-3.5 h-3.5" /></button>
+6109:                                  <button onClick={() => handleDeleteSupport(s.id)} className="p-1.5 rounded-full hover:bg-rose-500/10 text-rose-500"><Trash2 className="w-3.5 h-3.5" /></button>
+6110-                                </div>
+6111-                              </td>
+--
+6181:                      <button
+6182-                        onClick={openNewCseForm}
+6183-                        className="self-start md:self-auto bg-[#4CAD73] hover:bg-[#3FA05B] text-white text-xs font-bold px-5 py-3 rounded-full flex items-center gap-1.5 cursor-pointer shadow-md transition-all duration-300 focus:outline-none hover:-translate-y-0.5 active:translate-y-0"
+--
+6268:                            <button
+6269-                              key={c.id}
+6270-                              onClick={() => setSelectedCseAuditId(c.id)}
+--
+6304:                                    <button
+6305-                                      onClick={() => openEditCseForm(activeAudit)}
+6306-                                      className="p-1 rounded-full text-slate-400 hover:text-emerald-500 dark:hover:text-[#4CAD73] hover:bg-slate-200 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+--
+6311:                                    <button
+6312-                                      onClick={() => handleDeleteCse(activeAudit.id)}
+6313-                                      className="p-1 rounded-full text-rose-400/70 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors cursor-pointer"
+--
+6339:                              <button
+6340-                                onClick={() => setCseDetailTab("regulatory")}
+6341-                                className={`flex-1 py-2.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none ${
+--
+6350:                              <button
+6351-                                onClick={() => setCseDetailTab("dissemination")}
+6352-                                className={`flex-1 py-2.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none ${
+--
+6361:                              <button
+6362-                                onClick={() => setCseDetailTab("workplace")}
+6363-                                className={`flex-1 py-2.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none ${
+--
+6732:                              <button 
+6733-                                onClick={() => setIsAddingCse(false)} 
+6734-                                className="hover:opacity-75 transition-opacity"
+--
+6757:                                            <button
+6758-                                              key={opt}
+6759-                                              type="button"
+--
+6787:                                    <button
+6788-                                      key={opt}
+6789-                                      type="button"
+--
+6908:                              <button 
+6909-                                type="button" 
+6910-                                onClick={() => setIsAddingCse(false)}
+--
+6915:                              <button 
+6916-                                type="button" 
+6917-                                onClick={handleSaveCse}
+--
+6938:                    <button
+6939-                      onClick={openNewTransferForm}
+6940-                      className="bg-[#4CAD73] text-white text-xs font-bold px-4 py-2.5 rounded-full hover:bg-[#3FA05B] flex items-center gap-1.5 cursor-pointer focus:outline-none"
+--
+7086:                        <button onClick={() => setIsAddingTransfer(false)} className="px-4 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 text-slate-800 dark:text-neutral-200 dark:hover:bg-neutral-700 transition-colors">Cancel</button>
+7087:                        <button onClick={handleSaveTransfer} className="px-5 py-2 rounded-xl bg-[#4CAD73] text-white">Commit transfer</button>
+7088-                      </div>
+7089-                    </div>
+--
+7158:                              <button onClick={() => handleDeleteTransfer(tr.id)} className="text-rose-500 hover:opacity-75 focus:outline-none"><Trash2 className="w-4 h-4" /></button>
+7159-                            </td>
+7160-                          </tr>
+--
+7176:                    <button
+7177-                      onClick={openNewReEntrantForm}
+7178-                      className="bg-[#4CAD73] text-white text-xs font-bold px-4 py-2.5 rounded-full hover:bg-[#3FA05B] flex items-center gap-1.5 cursor-pointer focus:outline-none"
+--
+7316:                        <button onClick={() => setIsAddingReEntrant(false)} className="px-4 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 text-slate-800 dark:text-neutral-200 dark:hover:bg-neutral-700 transition-colors">Cancel</button>
+7317:                        <button onClick={handleSaveReEntrant} className="px-5 py-2 rounded-xl bg-[#4CAD73] text-white">Commit re-entrant</button>
+7318-                      </div>
+7319-                    </div>
+--
+7375:                              <button onClick={() => handleDeleteReEntrant(r.id)} className="text-rose-500 hover:opacity-75 focus:outline-none"><Trash2 className="w-4 h-4" /></button>
+7376-                            </td>
+7377-                          </tr>
+--
+7393:                    <button
+7394-                      onClick={openNewDropoutForm}
+7395-                      className="bg-[#4CAD73] hover:bg-[#4CAD73]/90 text-white text-xs font-bold px-4 py-2.5 rounded-full flex items-center gap-1.5 cursor-pointer focus:outline-none transition-colors"
+--
+7552:                        <button onClick={() => setIsAddingDropout(false)} className="px-4 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 text-slate-800 dark:text-neutral-200 dark:hover:bg-neutral-700 transition-colors">Cancel</button>
+7553:                        <button onClick={handleSaveDropout} className="px-5 py-2 rounded-xl bg-[#4CAD73] text-white">Append ticket</button>
+7554-                      </div>
+7555-                    </div>
+--
+7619:                                <button onClick={() => handleDeleteDropout(d.id)} className="text-[#7D8A77] hover:text-slate-600 dark:hover:text-neutral-300 focus:outline-none"><Trash2 className="w-4 h-4" /></button>
+7620-                              </td>
+7621-                            </tr>
+--
+7639:                    <button
+7640-                      onClick={openNewAbusedForm}
+7641-                      className="bg-[#4CAD73] hover:bg-[#4CAD73]/90 text-white text-xs font-bold px-4 py-2.5 rounded-full flex items-center gap-1.5 cursor-pointer focus:outline-none transition-colors"
+--
+7755:                        <button onClick={() => setIsAddingAbused(false)} className="px-4 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-slate-800 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 transition-colors">Cancel</button>
+7756:                        <button onClick={handleSaveAbused} className="px-5 py-2 rounded-xl bg-[#4CAD73] hover:bg-[#4CAD73]/90 text-white transition-colors font-bold">Log Record</button>
+7757-                      </div>
+7758-                    </div>
+--
+7816:                                <button onClick={() => handleDeleteAbused(a.id)} className="text-[#7D8A77] hover:text-slate-600 dark:hover:text-neutral-300 focus:outline-none cursor-pointer"><Trash2 className="w-4 h-4" /></button>
+7817-                              </td>
+7818-                            </tr>
+--
+7843:                    <button 
+7844-                      onClick={openNewTeacherMovementForm}
+7845-                      className="bg-[#4CAD73] hover:bg-[#5bc084] text-white font-bold text-xs px-5 py-2.5 rounded-full transition-all duration-300 flex items-center gap-1.5 shadow-sm cursor-pointer"
+--
+7859:                        <button onClick={() => setIsAddingTeacherMovement(false)} className="text-xs text-slate-500 hover:text-slate-700 cursor-pointer">X</button>
+7860-                      </div>
+7861-
+--
+8082:                        <button onClick={() => setIsAddingTeacherMovement(false)} className="px-4 py-2.5 rounded-xl bg-neutral-200 dark:bg-neutral-800 text-slate-800 dark:text-neutral-200 cursor-pointer">Cancel</button>
+8083:                        <button onClick={handleSaveTeacherMovement} className="px-5 py-2.5 rounded-xl bg-[#4CAD73] hover:bg-[#5bc084] text-white font-bold transition-all duration-300 shadow-sm cursor-pointer">Record Departure/Arrival</button>
+8084-                      </div>
+8085-                    </div>
+--
+8136:                                  <button 
+8137-                                    onClick={() => handleDeleteTeacherMovement(m.id)} 
+8138-                                    className="p-1.5 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 cursor-pointer transition-colors"
+--
+8167:                    <button 
+8168-                      onClick={handleSaveFacilities}
+8169-                      className="bg-[#4CAD73] text-white text-xs font-bold px-5 py-2 rounded-xl hover:bg-[#3FA05B] transition-colors focus:outline-none shadow-sm cursor-pointer"
+--
+8192:                              <button 
+8193-                                onClick={() => changeFacilityValue(item.key as any, "sub")}
+8194-                                className="w-7 h-7 rounded bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-neutral-100 flex items-center justify-center cursor-pointer hover:opacity-80 font-bold"
+--
+8197:                              <button 
+8198-                                onClick={() => changeFacilityValue(item.key as any, "add")}
+8199-                                className="w-7 h-7 rounded bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-neutral-100 flex items-center justify-center cursor-pointer hover:opacity-80 font-bold"
+--
+8223:                              <button 
+8224-                                onClick={() => changeFacilityValue(item.key as any, "sub")}
+8225-                                className="w-7 h-7 rounded bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-neutral-100 flex items-center justify-center hover:opacity-80 cursor-pointer font-bold"
+--
+8228:                              <button 
+8229-                                onClick={() => changeFacilityValue(item.key as any, "add")}
+8230-                                className="w-7 h-7 rounded bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-neutral-100 flex items-center justify-center hover:opacity-80 cursor-pointer font-bold"
+--
+8254:                              <button 
+8255-                                onClick={() => changeFacilityValue(item.key as any, "sub")}
+8256-                                className="w-7 h-7 rounded bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-neutral-100 flex items-center justify-center hover:opacity-80 cursor-pointer font-bold"
+--
+8259:                              <button 
+8260-                                onClick={() => changeFacilityValue(item.key as any, "add")}
+8261-                                className="w-7 h-7 rounded bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-neutral-100 flex items-center justify-center hover:opacity-80 cursor-pointer font-bold"
+--
+8288:                      <button 
+8289-                        type="button"
+8290-                        onClick={() => {
+--
+8486:          <button 
+8487-            type="button"
+8488-            onClick={() => {
+--
+8519:          <button 
+8520-            type="button"
+8521-            onClick={() => {
+--
+8618:              <button
+8619-                type="button"
+8620-                onClick={() => {
+--
+8723:                          <button 
+8724-                            type="button"
+8725-                            onClick={() => setTextbookSelectedCell({ subject: item.subject, std: item.std })}
+--
+8764:                  <button
+8765-                    type="button"
+8766-                    onClick={() => handleLocalChange(activeItem.subject, activeItem.std, activeItem.available - 5)}
+--
+8771:                  <button
+8772-                    type="button"
+8773-                    onClick={() => handleLocalChange(activeItem.subject, activeItem.std, activeItem.available - 1)}
+--
+8785:                  <button
+8786-                    type="button"
+8787-                    onClick={() => handleLocalChange(activeItem.subject, activeItem.std, activeItem.available + 1)}
+--
+8792:                  <button
+8793-                    type="button"
+8794-                    onClick={() => handleLocalChange(activeItem.subject, activeItem.std, activeItem.available + 5)}
+--
+8839:                      <button
+8840-                        key={cond.type}
+8841-                        type="button"
+--
+8923:                        <button
+8924-                          onClick={() => handleCallDeprsAi("narrative")}
+8925-                          disabled={aiLoading}
+--
+8932:                        <button
+8933-                          onClick={() => handleCallDeprsAi("quality")}
+8934-                          disabled={aiLoading}
+--
+9003:                      <button 
+9004-                        onClick={() => setSelectedStudentForView(null)}
+9005-                        className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-neutral-800 focus:outline-none transition-colors"
+--
+9226:                        <button 
+9227-                          onClick={() => setSelectedStudentForView(null)}
+9228-                          className="px-4 py-2 text-xs font-semibold bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-slate-800 dark:text-neutral-200 rounded-xl focus:outline-none transition-colors"
+--
+9232:                        <button 
+9233-                          onClick={() => {
+9234-                            const st = selectedStudentForView;

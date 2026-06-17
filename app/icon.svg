@@ -1,0 +1,115 @@
+<svg
+  viewBox="0 0 100 100"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  width="100%"
+  height="100%"
+>
+  <defs>
+    <!-- Main Teal-to-Emerald Gradient -->
+    <linearGradient id="logoPrimary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#00E5FF" />
+      <stop offset="60%" stopColor="#00A3A3" />
+      <stop offset="100%" stopColor="#10B981" />
+    </linearGradient>
+
+    <!-- Accent Gold-to-Sunset Radiant -->
+    <linearGradient id="logoAccent" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#F59E0B" />
+      <stop offset="100%" stopColor="#EC4899" />
+    </linearGradient>
+
+    <!-- Subdued Dark Backdrop Gradient -->
+    <linearGradient id="logoBackdrop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stopColor="#1E293B" />
+      <stop offset="100%" stopColor="#0F172A" />
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Circular Aperture (The Vision Arc) -->
+  <circle
+    cx="50"
+    cy="50"
+    r="44"
+    stroke="url(#logoPrimary)"
+    strokeWidth="3.5"
+    strokeLinecap="round"
+    strokeDasharray="210 50"
+  />
+
+  <!-- Outer Rotating Segment (Holographic/Data Rings) -->
+  <circle
+    cx="50"
+    cy="50"
+    r="36"
+    stroke="url(#logoAccent)"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeDasharray="60 140"
+    opacity="0.8"
+    strokeDashoffset="30"
+  />
+
+  <!-- Core Jewel: Shield & Eye Contour -->
+  <path
+    d="M50 16 C30 16 22 28 22 42 C22 62 44 82 50 84 C56 82 78 62 78 42 C78 28 70 16 50 16 Z"
+    fill="url(#logoBackdrop)"
+    stroke="url(#logoPrimary)"
+    strokeWidth="1.5"
+    opacity="0.95"
+  />
+
+  <!-- Wisdom Beacon/Insight Sparkle (Core of Vision) -->
+  <path
+    d="M50 25 L53 35 L63 38 L53 41 L50 51 L47 41 L37 38 L47 35 Z"
+    fill="url(#logoAccent)"
+  />
+
+  <!-- Origami-style stylized Graduation Cap / Open Book combination -->
+  <!-- Left Page / Left Cap wing -->
+  <path
+    d="M50 50 L28 41 L50 32"
+    stroke="url(#logoPrimary)"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  />
+  <!-- Right Page / Right Cap wing -->
+  <path
+    d="M50 50 L72 41 L50 32"
+    stroke="url(#logoPrimary)"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  />
+  <!-- Foundation Base (representing scholastic support pillars & data bars) -->
+  <path
+    d="M36 52 L36 62 L50 72 L64 62 L64 52"
+    stroke="#FFFFFF"
+    strokeWidth="2.5"
+    strokeLinejoin="round"
+    strokeLinecap="round"
+    opacity="0.90"
+  />
+  
+  <!-- The Horizon line representing statistics and insights -->
+  <line
+    x1="42"
+    y1="57"
+    x2="58"
+    y2="57"
+    stroke="url(#logoPrimary)"
+    strokeWidth="3"
+    strokeLinecap="round"
+  />
+
+  <line
+    x1="45"
+    y1="63"
+    x2="55"
+    y2="63"
+    stroke="url(#logoAccent)"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+  />
+</svg>
