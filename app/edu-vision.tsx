@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Sidebar from "./layouts/Sidebar";
 import Header from "./layouts/Header";
 import { LandingPage } from "./auth/LandingPage";
+import { SplashScreen } from "./components/SplashScreen";
 import { DashboardOverview } from "./dashboard/DashboardOverview";
 import { SchoolInfoRegistry } from "./registries/SchoolInfoRegistry";
 import { StudentsRegistry } from "./registries/StudentsRegistry";
@@ -23,7 +24,6 @@ import { RecreationalFacilitiesRegistry } from "./resources/RecreationalFaciliti
 import { FacilitiesRegistry } from "./facilities/FacilitiesRegistry";
 import { AiAuditPanel } from "./analytics/AiAuditPanel";
 import { Sparkles, Library } from "lucide-react";
-import { LogoSplashScreen } from "./components/LogoSplashScreen";
 import { ToolsHub } from "./dashboard/ToolsHub";
 
 export const EduVisionPortal: React.FC = () => {
@@ -50,7 +50,7 @@ export const EduVisionPortal: React.FC = () => {
   };
 
   if (showSplash) {
-    return <LogoSplashScreen onComplete={() => setShowSplash(false)} />;
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
   if (!isAuthenticated) {
@@ -62,6 +62,8 @@ export const EduVisionPortal: React.FC = () => {
       <ToolsHub
         userName={userName}
         userRole={userRole}
+        isDark={isDark}
+        setIsDark={setIsDark}
         onLaunchTool={(tabId) => {
           if (tabId) {
             setActiveTab2(tabId);
@@ -137,6 +139,9 @@ export const EduVisionPortal: React.FC = () => {
           userRole={userRole}
           isDark={isDark}
           setIsDark={setIsDark}
+          activeTab={activeTab}
+          onLogout={handleLogout}
+          onExit={() => setIsToolLaunched(false)}
         />
 
         {/* Inner page panel viewport */}

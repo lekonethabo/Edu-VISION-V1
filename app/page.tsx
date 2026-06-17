@@ -1,7 +1,13 @@
 "use client";
 
 import React from "react";
-import { EduVisionPortal } from "./edu-vision";
+import dynamic from "next/dynamic";
+
+// Dynamically import EduVisionPortal with SSR disabled to prevent hydration mismatches
+// from client-only/localStorage/time-sensitive components.
+const EduVisionPortal = dynamic(() => import("./edu-vision"), {
+  ssr: false,
+});
 
 export default function Page() {
   return (

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { EduVisionLogo } from "@/app/components/EduVisionLogo";
 import { 
   Baby, 
   School, 
@@ -18,13 +17,18 @@ import {
   Clock, 
   ArrowRight,
   ChevronRight,
-  X
+  X,
+  Sun,
+  Moon
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
+import { GeometricLogo } from "../components/GeometricLogo";
 
 interface ToolsHubProps {
   userName: string;
   userRole: string;
+  isDark: boolean;
+  setIsDark: (dark: boolean) => void;
   onLaunchTool: (tabId: string) => void;
   onLogout: () => void;
 }
@@ -110,6 +114,8 @@ const ALL_TOOLS: ToolCard[] = [
 export const ToolsHub: React.FC<ToolsHubProps> = ({
   userName,
   userRole,
+  isDark,
+  setIsDark,
   onLaunchTool,
   onLogout,
 }) => {
@@ -129,18 +135,18 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
 
   const triggerToast = (message: string, type: "info" | "success" | "warning" = "success") => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
+    setTimeout(() => setToast(null), 5000);
   };
 
   const handleLaunch = (tool: ToolCard) => {
     if (tool.status !== "Online") {
       setActiveModal(tool);
     } else {
-      triggerToast(`Launching ${tool.title}...`, "success");
-      // Delayed navigate for elegant transitions
+      triggerToast(`Initializing ${tool.title} registry workspace... Access granted.`, "success");
+      // Delayed navigate for elegant transitions & readability
       setTimeout(() => {
         onLaunchTool(tool.targetTab);
-      }, 400);
+      }, 2000);
     }
   };
 
@@ -160,24 +166,44 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
   }, [searchQuery, activeFilter]);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#00050c] text-slate-900 dark:text-slate-100 p-4 md:p-8 space-y-8 font-sans transition-all duration-300">
+    <div className={`min-h-screen ${isDark ? "dark bg-[#00050c] text-white" : "bg-slate-50 text-slate-900"} p-4 md:p-8 space-y-8 font-sans transition-all duration-300`}>
       
       {/* Toast Alert Box */}
-      {toast && (
-        <div className={`fixed bottom-5 right-5 p-4 rounded-xl shadow-lg border flex items-center gap-3 text-sm font-bold z-50 animate-bounce ${
-          toast.type === "success" ? "bg-emerald-550 dark:bg-emerald-900/90 text-white border-emerald-500" :
-          toast.type === "warning" ? "bg-amber-550 dark:bg-amber-900/90 text-white border-amber-500" :
-          "bg-blue-600 dark:bg-blue-900/90 text-white border-blue-500"
-        }`}>
-          <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-          <span>{toast.message}</span>
-        </div>
-      )}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className={`fixed bottom-6 right-6 p-4 rounded-2xl shadow-2xl border flex items-center gap-3 text-sm font-semibold z-50 max-w-sm backdrop-blur-md ${
+              toast.type === "success" 
+                ? "bg-slate-900/95 dark:bg-[#001428]/95 text-white border-emerald-500/50" 
+                : toast.type === "warning" 
+                ? "bg-slate-900/95 dark:bg-[#001428]/95 text-white border-amber-500/50" 
+                : "bg-slate-900/95 dark:bg-[#001428]/95 text-white border-blue-550/50"
+            }`}
+          >
+            {toast.type === "success" && <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />}
+            {toast.type === "warning" && <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 animate-pulse" />}
+            {toast.type === "info" && <CheckCircle2 className="w-5 h-5 text-blue-400 flex-shrink-0" />}
+            
+            <div className="flex flex-col">
+              <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase font-mono leading-none mb-1">
+                {toast.type === "success" ? "Success" : toast.type === "warning" ? "Notice" : "Information"}
+              </span>
+              <span className="text-slate-100 text-xs tracking-tight">{toast.message}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Header Panel */}
       <header className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-[#001020] border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm gap-6">
         <div className="flex items-center gap-4 self-start md:self-auto">
-          <EduVisionLogo size="md" />
+          <div className="flex-shrink-0">
+            <GeometricLogo size={48} onDarkBg={isDark} />
+          </div>
           <div>
             <h1 className="text-xl font-black text-[#002652] dark:text-white uppercase tracking-tight flex items-center gap-2">
               Edu-VISION Data Hub
@@ -190,6 +216,28 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
 
         {/* Action Widgets */}
         <div className="flex items-center gap-4 w-full md:w-auto justify-end">
+          
+          {/* Connection Indicator */}
+          <div className="hidden lg:flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400 text-[10px] font-bold uppercase py-1.5 px-3.5 rounded-xl border border-emerald-200/55 dark:border-emerald-900/40 relative">
+            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
+            <span className="w-2 h-2 bg-emerald-500 rounded-full absolute" />
+            <span className="ml-1.5">NODE SYNC ACTIVE</span>
+          </div>
+
+          {/* Theme Switcher */}
+          <button
+            onClick={() => setIsDark(!isDark)}
+            id="btn-toggle-darkmode-hub"
+            className="p-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-xl transition-all cursor-pointer border border-slate-250/30 dark:border-slate-800 text-slate-600 dark:text-slate-350"
+            title="Toggle Color Theme"
+            type="button"
+          >
+            {isDark ? (
+              <Sun className="w-5 h-5 text-amber-500" />
+            ) : (
+              <Moon className="w-5 h-5 text-slate-600" />
+            )}
+          </button>
           
           {/* Notification Button */}
           <div className="relative">

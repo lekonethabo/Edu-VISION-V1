@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { EduVisionLogo } from "@/app/components/EduVisionLogo";
 import { 
   Users, 
   GraduationCap, 
@@ -432,8 +431,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ data, onDr
     <div className="space-y-6" id="dashboard-advanced-overview-panel">
       {/* Dynamic Header Sector */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
-        <div className="flex items-center gap-4">
-          <EduVisionLogo size="md" className="flex-shrink-0" />
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-[#00A3A3]/10 text-[#00A3A3] rounded-2xl flex-shrink-0">
+            <GraduationCap className="w-7 h-7" />
+          </div>
           <div>
             <h1 className="text-xl font-extrabold text-[#002652] dark:text-[#00A3A3] tracking-tight">
               EMIS Analytical Dashboard Overview

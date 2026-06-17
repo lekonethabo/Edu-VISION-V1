@@ -26,6 +26,7 @@ import {
   Sparkles,
   ArrowLeft
 } from "lucide-react";
+import { GeometricLogo } from "../components/GeometricLogo";
 
 interface SidebarProps {
   activeTab: string;
@@ -69,6 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Toggle Bar */}
       <div className="md:hidden flex items-center justify-between p-4 bg-prussian text-white sticky top-0 z-50 shadow-md">
         <div className="flex items-center gap-2">
+          <GeometricLogo size={24} onDarkBg />
           <span className="font-bold text-sm tracking-tight">Edu-VISION</span>
         </div>
         <button
@@ -91,6 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {/* Brand Banner (Hidden on desktop if redundant, keeping it clean) */}
         <div className="hidden md:flex items-center gap-3 mb-6 pb-4 border-b border-[#001c3d]">
+          <GeometricLogo size={36} onDarkBg />
           <div>
             <h1 className="text-base font-extrabold text-white tracking-tight leading-none flex items-center gap-1">
               Edu-<span className="text-sea">VISION</span>

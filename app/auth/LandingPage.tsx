@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShieldCheck, BookOpen, User, Lock, ArrowRight, CornerDownRight } from "lucide-react";
+import { ShieldCheck, BookOpen, User, Lock, ArrowRight, CornerDownRight, GraduationCap } from "lucide-react";
 import { motion } from "motion/react";
-import { EduVisionLogo } from "../components/EduVisionLogo";
+import { GeometricLogo } from "../components/GeometricLogo";
 
 interface LandingPageProps {
   onLogin: (role: string, name: string) => void;
@@ -32,7 +32,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
         
         {/* Header branding lockup */}
         <div className="text-center space-y-4">
-          <EduVisionLogo size="xl" className="mx-auto" />
+          <div className="mx-auto flex justify-center">
+            <GeometricLogo size={72} />
+          </div>
           <div>
             <h1 className="text-2xl font-black text-prussian tracking-tight uppercase flex items-center justify-center gap-1">
               Edu-<span className="text-sea">VISION</span> EMIS
