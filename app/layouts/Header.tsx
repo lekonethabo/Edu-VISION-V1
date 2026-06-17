@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const getActiveTabLabel = (tab: string): string => {
     switch (tab) {
-      case "dashboard": return "EMIS Executive Dashboard";
+      case "dashboard": return "PRIMARY DASHBOARD OVERVIEW";
       case "school": return "School Profile Registry";
       case "students": return "Students Directory";
       case "transfers": return "Inter-school Transfers Control";

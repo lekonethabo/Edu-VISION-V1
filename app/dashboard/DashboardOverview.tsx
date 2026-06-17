@@ -25,7 +25,8 @@ import {
   Wifi,
   Search,
   Filter,
-  UserX
+  UserX,
+  Baby
 } from "lucide-react";
 import { 
   BarChart, 
@@ -437,7 +438,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ data, onDr
           </div>
           <div>
             <h1 className="text-xl font-extrabold text-[#002652] dark:text-[#00A3A3] tracking-tight">
-              EMIS Analytical Dashboard Overview
+              PRIMARY DATA COLLECTION OVERVIEW
             </h1>
             <p className="text-xs text-slate-500 mt-1">
               Primary school indicators, comprehensive welfare audits, staff development records, and resource distribution index.

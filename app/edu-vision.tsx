@@ -15,6 +15,19 @@ import { ReEntrantsRegistry } from "./registries/ReEntrantsRegistry";
 import { AbusedStudentsRegistry } from "./registries/AbusedStudentsRegistry";
 import { SupportStaffRegistry } from "./registries/SupportStaffRegistry";
 import { CseAuditRegistry } from "./registries/CseAuditRegistry";
+import { EarlyChildhoodDashboard } from "./dashboard/EarlyChildhoodDashboard";
+import { EarlyChildhoodSchoolInfo } from "./registries/EarlyChildhoodSchoolInfo";
+import { EarlyChildhoodStudentsRegistry } from "./registries/EarlyChildhoodStudentsRegistry";
+import { EarlyChildhoodTransfersRegistry } from "./registries/EarlyChildhoodTransfersRegistry";
+import { EarlyChildhoodDropoutsRegistry } from "./registries/EarlyChildhoodDropoutsRegistry";
+import { EarlyChildhoodReEntrantsRegistry } from "./registries/EarlyChildhoodReEntrantsRegistry";
+import { EarlyChildhoodGraduationRegistry } from "./registries/EarlyChildhoodGraduationRegistry";
+import { EarlyChildhoodTeachingStaffRegistry } from "./registries/EarlyChildhoodTeachingStaffRegistry";
+import { EarlyChildhoodSupportStaffRegistry } from "./registries/EarlyChildhoodSupportStaffRegistry";
+import { TeacherMovementRegistry } from "./registries/TeacherMovementRegistry";
+import { TeachersSpecialProgrammeRegistry } from "./registries/TeachersSpecialProgrammeRegistry";
+import { EarlyChildhoodAbusedStudentsRegistry } from "./registries/EarlyChildhoodAbusedStudentsRegistry";
+import { EarlyChildhoodAccidentsRegistry } from "./registries/EarlyChildhoodAccidentsRegistry";
 import { TextbooksRegistry } from "./resources/TextbooksRegistry";
 import { FurnitureRegistry } from "./resources/FurnitureRegistry";
 import { EquipmentRegistry } from "./resources/EquipmentRegistry";
@@ -30,6 +43,7 @@ export const EduVisionPortal: React.FC = () => {
   const [showSplash, setShowSplash] = useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isToolLaunched, setIsToolLaunched] = useState<boolean>(false);
+  const [selectedTool, setSelectedTool] = useState<"primary_data" | "early_childhood" | string | null>(null);
   const [userRole, setUserRole] = useState<string>("School Administrator");
   const [userName, setUserName] = useState("K. NGWAKO (EMIS)");
   const [activeTab, setActiveTab2] = useState<string>("dashboard");
@@ -41,11 +55,13 @@ export const EduVisionPortal: React.FC = () => {
     setUserName(name);
     setIsAuthenticated(true);
     setIsToolLaunched(false);
+    setSelectedTool(null);
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setIsToolLaunched(false);
+    setSelectedTool(null);
     setActiveTab2("dashboard");
   };
 
@@ -64,8 +80,9 @@ export const EduVisionPortal: React.FC = () => {
         userRole={userRole}
         isDark={isDark}
         setIsDark={setIsDark}
-        onLaunchTool={(tabId) => {
-          if (tabId) {
+        onLaunchTool={(toolId, tabId) => {
+          if (toolId && tabId) {
+            setSelectedTool(toolId);
             setActiveTab2(tabId);
             setIsToolLaunched(true);
           }
@@ -80,6 +97,32 @@ export const EduVisionPortal: React.FC = () => {
     switch (activeTab) {
       case "dashboard":
         return <DashboardOverview onDrillDown={setActiveTab2} />;
+      case "ece_dashboard":
+        return <EarlyChildhoodDashboard />;
+      case "ece_school":
+        return <EarlyChildhoodSchoolInfo />;
+      case "ece_students":
+        return <EarlyChildhoodStudentsRegistry />;
+      case "ece_transfers":
+        return <EarlyChildhoodTransfersRegistry />;
+      case "ece_dropouts":
+        return <EarlyChildhoodDropoutsRegistry />;
+      case "ece_re_entrants":
+        return <EarlyChildhoodReEntrantsRegistry />;
+      case "ece_graduates":
+        return <EarlyChildhoodGraduationRegistry />;
+      case "ece_teachers":
+        return <EarlyChildhoodTeachingStaffRegistry />;
+      case "ece_support":
+        return <EarlyChildhoodSupportStaffRegistry />;
+      case "ece_teacher_movement":
+        return <TeacherMovementRegistry />;
+      case "ece_special_programme":
+        return <TeachersSpecialProgrammeRegistry />;
+      case "ece_abused_students":
+        return <EarlyChildhoodAbusedStudentsRegistry />;
+      case "ece_accidents":
+        return <EarlyChildhoodAccidentsRegistry />;
       case "school":
         return <SchoolInfoRegistry />;
       case "students":
@@ -130,6 +173,7 @@ export const EduVisionPortal: React.FC = () => {
         setMobileMenuOpen={setMobileMenuOpen}
         isDark={isDark}
         onExit={() => setIsToolLaunched(false)}
+        selectedTool={selectedTool || undefined}
       />
 
       {/* Main Workspace */}
@@ -147,27 +191,6 @@ export const EduVisionPortal: React.FC = () => {
         {/* Inner page panel viewport */}
         <main className="flex-1 p-4 md:p-8 space-y-6 max-w-7xl w-full mx-auto pb-16">
           
-          {/* Persistent AI Auditor floating alert when not on AI page */}
-          {activeTab !== "ai_audit" && (
-            <div className="p-4 bg-linear-to-r from-[#002652] to-[#00A3A3] text-white rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-white/10 rounded-xl">
-                  <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
-                </div>
-                <div>
-                  <span className="text-xs font-extrabold uppercase tracking-widest text-sea block">Intelligent Copilot Assistant</span>
-                  <span className="text-xs text-slate-100">Instantly inspect and audit standard textbooks deficit, pupil-teacher classroom density or inclusive SEND facilities.</span>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveTab2("ai_audit")}
-                className="px-4.5 py-2.5 bg-sea hover:bg-slate-100 hover:text-prussian font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all flex items-center gap-1.5 cursor-pointer flex-shrink-0 text-white"
-              >
-                <span>Launch EMIS AI Auditor</span>
-              </button>
-            </div>
-          )}
-
           {/* Render Active Registry View Component */}
           <div className="fade-in-up duration-250">
             {renderViewContent()}

@@ -29,7 +29,7 @@ interface ToolsHubProps {
   userRole: string;
   isDark: boolean;
   setIsDark: (dark: boolean) => void;
-  onLaunchTool: (tabId: string) => void;
+  onLaunchTool: (toolId: string, tabId: string) => void;
   onLogout: () => void;
 }
 
@@ -59,9 +59,9 @@ const ALL_TOOLS: ToolCard[] = [
     title: "Early Childhood Data Collection",
     icon: Baby,
     description: "Pre-primary nurseries census tracking. Monitors toddler growth indices, early classroom ratios, and community health allocations.",
-    status: "Offline Standby",
+    status: "Online",
     actionText: "Launch Registry",
-    targetTab: "",
+    targetTab: "ece_dashboard",
     colorClass: "text-[#97620C] bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50",
     bgGradient: "from-amber-50 to-amber-100/50 dark:from-amber-950/10 dark:to-amber-950/20"
   },
@@ -145,7 +145,7 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
       triggerToast(`Initializing ${tool.title} registry workspace... Access granted.`, "success");
       // Delayed navigate for elegant transitions & readability
       setTimeout(() => {
-        onLaunchTool(tool.targetTab);
+        onLaunchTool(tool.id, tool.targetTab);
       }, 2000);
     }
   };

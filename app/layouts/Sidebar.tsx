@@ -24,7 +24,10 @@ import {
   Menu,
   X,
   Sparkles,
-  ArrowLeft
+  ArrowLeft,
+  GraduationCap,
+  ArrowRightLeft,
+  Activity
 } from "lucide-react";
 import { GeometricLogo } from "../components/GeometricLogo";
 
@@ -35,6 +38,7 @@ interface SidebarProps {
   setMobileMenuOpen: (open: boolean) => void;
   isDark: boolean;
   onExit: () => void;
+  selectedTool?: "primary_data" | "early_childhood" | string;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -43,9 +47,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   mobileMenuOpen,
   setMobileMenuOpen,
   isDark,
-  onExit
+  onExit,
+  selectedTool
 }) => {
-  const menuItems = [
+  const isEce = selectedTool === "early_childhood";
+
+  const primaryMenuItems = [
     { id: "dashboard", label: "Dashboard overview", icon: LayoutDashboard },
     { id: "school", label: "School Info", icon: Building },
     { id: "students", label: "Students Registry", icon: Users },
@@ -64,6 +71,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "boarding", label: "Boarding Facilities", icon: Home },
     { id: "recreational", label: "Recreational Tracks", icon: Trophy }
   ];
+
+  const eceMenuItems = [
+    { id: "ece_dashboard", label: "ECE Dashboard overview", icon: LayoutDashboard },
+    { id: "ece_school", label: "School Info", icon: Building },
+    { id: "ece_students", label: "Students Registry", icon: Users },
+    { id: "ece_transfers", label: "Transfers Registry", icon: ArrowLeftRight },
+    { id: "ece_dropouts", label: "Dropouts Registry", icon: UserMinus },
+    { id: "ece_re_entrants", label: "Re-entrants Registry", icon: UserPlus },
+    { id: "ece_graduates", label: "Pre-Primary Graduation", icon: GraduationCap },
+    { id: "ece_teachers", label: "Teaching Staff", icon: Briefcase },
+    { id: "ece_teacher_movement", label: "Teacher Movement", icon: ArrowRightLeft },
+    { id: "ece_special_programme", label: "Special Programme", icon: Award },
+    { id: "ece_abused_students", label: "Abused Students", icon: ShieldAlert },
+    { id: "ece_accidents", label: "Accidents", icon: Activity },
+    { id: "ece_support", label: "Support Staff", icon: Users },
+  ];
+
+  const menuItems = isEce ? eceMenuItems : primaryMenuItems;
 
   return (
     <>
@@ -111,7 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="flex items-center justify-center gap-2 bg-[#001c3d] hover:bg-golden/20 hover:text-white text-slate-300 px-4 py-2 rounded text-xs font-bold transition-all duration-150 mb-6 cursor-pointer border border-[#002f66]"
         >
           <ArrowLeft className="w-3.5 h-3.5 text-sea" />
-          <span>Exit Standard 1-7 Registry</span>
+          <span>{isEce ? "Exit ECE Portal Hub" : "Exit Standard 1-7 Registry"}</span>
         </button>
 
         {/* Sidebar Nav Items */}
@@ -145,7 +170,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           <div>
             <span className="text-[10px] uppercase font-mono font-bold text-slate-400 tracking-widest block mb-2 px-1 text-left">
-              Operational Registries
+              {isEce ? "ECE Core Workspaces" : "Operational Registries"}
             </span>
             <ul className="space-y-1">
               {menuItems.slice(1).map((item) => (
