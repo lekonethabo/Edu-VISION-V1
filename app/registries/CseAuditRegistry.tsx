@@ -262,14 +262,8 @@ export const CseAuditRegistry: React.FC = () => {
   };
 
   const handleCloseModal = () => {
-    if (isModified) {
-      if (window.confirm("You have unsaved changes. Are you sure you want to discard them?")) {
-        setModalOpen(false);
-        setIsModified(false);
-      }
-    } else {
-      setModalOpen(false);
-    }
+    setModalOpen(false);
+    setIsModified(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
