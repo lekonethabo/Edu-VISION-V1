@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST="{\"app/page.tsx -> ./edu-vision\":{\"id\":\"app/page.tsx -> ./edu-vision\",\"files\":[\"static/chunks/_app-pages-browser_app_edu-vision_tsx.js\"]}}"
