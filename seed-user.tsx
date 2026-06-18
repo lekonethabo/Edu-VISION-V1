@@ -7,22 +7,22 @@ import 'dotenv/config';
 const dbUrl = new URL(process.env.DATABASE_URL || "");
 
 const dbAdapter = new PrismaMariaDb({
-  host: dbUrl.hostname,
-  port: dbUrl.port ? parseInt(dbUrl.port) : 3306,
-  user: dbUrl.username,
-  password: dbUrl.password,
-  database: dbUrl.pathname.substring(1),
-  connectTimeout: 10000, // Increase connection timeout to 10 seconds
-  ssl: {
-    rejectUnauthorized: false
-  }
+    host: dbUrl.hostname,
+    port: dbUrl.port ? parseInt(dbUrl.port) : 3306,
+    user: dbUrl.username,
+    password: dbUrl.password,
+    database: dbUrl.pathname.substring(1),
+    connectTimeout: 10000, // Increase connection timeout to 10 seconds
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 const prisma = new PrismaClient({ adapter: dbAdapter });
 
 async function main() {
     const regID = 'E5/7/29';
-    const plainPassword = 'password123'; // Replace with your desired password
+    const plainPassword = 'password321'; // Replace with your desired password
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
