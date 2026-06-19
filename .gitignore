@@ -4,5 +4,7 @@ coverage/
 *.log
 .env*
 !.env.example
-
+.env.local                    
+.next/
 /generated/prisma
+.env.local
