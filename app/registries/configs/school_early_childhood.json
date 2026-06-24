@@ -1,0 +1,33 @@
+{
+  "form_title": "ECCE School Info",
+  "fields": [
+    { "name": "SCHOOL NAME", "column": "A", "input_type": "text" },
+    { "name": "DISTRICT", "column": "B", "input_type": "select", "options": ["Bobirwa", "Boteti", "Charles Hill", "Chobe", "Francistown", "Gaborone", "Gantsi", "Goodhope", "Gumare", "Hukuntsi", "Jwaneng/ Mabutsane", "Kanye", "Kgalagadi North", "Kgalagadi South", "Kgatleng", "Lentsweletau", "Letlhakeng", "Lobatse", "Mahalapye", "Maun", "Mogoditshane/ Thamaga", "Molepolole", "Moshupa", "North-East", "Okavango", "Palapye", "Ramotswa", "Sefhare", "Selibe Phikwe", "Serowe", "Shakawe", "Shoshong", "South East", "Tonota", "Tsabong", "Tutume"] },
+    { "name": "EDUCATION REGION", "column": "C", "input_type": "select", "options": ["Central", "Chobe", "Gantsi", "Kgalagadi", "Kgatleng", "Kweneng", "North East", "North West", "South", "South East"] },
+    { "name": "SUB-REGION", "column": "D", "input_type": "select", "options": ["Bobirwa", "Boteti", "Charles Hill", "Chobe", "Francistown", "Gaborone", "Gantsi", "Goodhope", "Gumare", "Hukuntsi", "Jwaneng/ Mabutsane", "Kanye", "Kgalagadi North", "Kgalagadi South", "Kgatleng", "Lentsweletau", "Letlhakeng", "Lobatse", "Mahalapye", "Maun", "Mogoditshane/ Thamaga", "Molepolole", "Moshupa", "North-East", "Palapye", "Sefhare", "Selibe Phikwe", "Serowe", "Shakawe", "Shoshong", "South East", "Tonota", "Tsabong", "Tutume"] },
+    { "name": "CITY/TOWN/ VILLAGE", "column": "E", "input_type": "text" },
+    { "name": "EXTENSION/WARD", "column": "F", "input_type": "text" },
+    { "name": "CENTRE REGISTRATION STATUS", "column": "G", "input_type": "select", "options": ["Registered", "Not Registered", "Waivered"] },
+    { "name": "CENTRE REGISTRATION NUMBER", "column": "H", "input_type": "text" },
+    { "name": "YEAR OF ESTABLISHMENT", "column": "I", "input_type": "number" },
+    { "name": "TYPE OF CENTRE/ SCHOOL", "column": "J", "input_type": "select", "options": ["Church", "Community", "Government", "Government Aided", "NGO", "Private", "Other"] },
+    { "name": "TYPE OF PREMISES", "column": "K", "input_type": "select", "options": ["Church", "Hall", "Primary School", "Purposely Built", "Residential", "Other"] },
+    { "name": "STATUS OF PREMISES", "column": "L", "input_type": "select", "options": ["Owned", "Rented", "Other"] },
+    { "name": "SERVICE PROVIDED", "column": "M", "input_type": "select", "options": ["Baby Care", "Baby Care & Day Care", "Day Care", "Day Care & Pre- Primary", "Pre-Primary", "Baby Care, Day Care & Pre- Primary", "Playgroup"] },
+    { "name": "OWNERSHIP", "column": "N", "input_type": "select", "options": ["Individual Citizen", "Individual Non- Citizen", "Government", "Company"] },
+    { "name": "SCHOOL FEES PER TERM", "column": "O", "input_type": "text" },
+    { "name": "HALF DAY", "column": "P", "input_type": "select", "options": ["Half Day", "Full Day"] },
+    { "name": "FULL DAY", "column": "Q", "input_type": "select", "options": ["Half Day", "Full Day"] },
+    { "name": "MEALS GIVEN TO CHILDREN", "column": "R", "input_type": "select", "options": ["Breakfast", "Lunch", "Snack", "Breakfast + Lunch", "Breakfast + Lunch + Snack", "Breakfast + Snack", "Lunch + Snack", "None"] },
+    { "name": "INTERNET INFRASTRUCTURE", "column": "S", "input_type": "select", "options": ["None", "Local Area Network (LAN)", "WIFI", "WIFI & LAN"] },
+    { "name": "TYPE OF INTERNET CONNECTION", "column": "T", "input_type": "select", "options": ["None", "Local Area Network (LAN)", "WIFI", "WIFI & LAN"] },
+    { "name": "SPEED/ BANDWIDTH", "column": "U", "input_type": "select", "options": ["<5 Mbps", "5 - 20 Mbps", "21 - 40 Mbps", "41 - 60 Mbps", "61 - 80 Mbps", "81 - 100 Mbps", ">100 Mbps"] },
+    { "name": "COVERAGE", "column": "V", "input_type": "select", "options": ["N/A", "Partial", "Full"] },
+    { "name": "SOURCE_ELECTRICITY", "column": "W", "input_type": "select", "options": ["Main Power Grid (BPC)", "Solar Power", "Generator", "No Power"] },
+    { "name": "SOURCE_WATER", "column": "X", "input_type": "select", "options": ["Stand Pipe (From Water Company)", "Bowser", "Borehole"] },
+    { "name": "SECURITY IN PLACE", "column": "Y", "input_type": "select", "options": ["None", "Security Guard", "Fence", "Security Guard + Fence"] },
+    { "name": "TELEPHONE", "column": "Z", "input_type": "text" },
+    { "name": "FAX", "column": "AA", "input_type": "text" },
+    { "name": "EMAIL", "column": "AB", "input_type": "text" }
+  ]
+}

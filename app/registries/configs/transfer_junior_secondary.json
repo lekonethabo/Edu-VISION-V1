@@ -1,0 +1,16 @@
+{
+  "form_title": "Junior Secondary Student Transfer",
+  "fields": [
+    { "name": "NATIONAL ID/ PASSPORT", "column": "A", "input_type": "text", "validation": { "allow_blank": false } },
+    { "name": "SURNAME", "column": "B", "input_type": "text", "validation": { "allow_blank": false } },
+    { "name": "STUDENT NAMES", "column": "C", "input_type": "text", "validation": { "allow_blank": false } },
+    { "name": "NATIONALITY", "column": "D", "input_type": "text", "validation": { "allow_blank": false } },
+    { "name": "SEX", "column": "E", "input_type": "select", "options": ["Male", "Female"], "validation": { "allow_blank": false } },
+    { "name": "FORM", "column": "F", "input_type": "select", "options": ["Form 1", "Form 2", "Form 3"], "validation": { "allow_blank": false } },
+    { "name": "TRANSFER STATUS", "column": "G", "input_type": "select", "options": ["Transfer In", "Transfer Out"], "validation": { "allow_blank": false } },
+    { "name": "DAY", "column": "H", "input_type": "number", "validation": { "allow_blank": false, "min": 1, "max": 31 } },
+    { "name": "MONTH", "column": "I", "input_type": "number", "validation": { "allow_blank": false, "min": 1, "max": 12 } },
+    { "name": "YEAR", "column": "J", "input_type": "number", "validation": { "allow_blank": false, "min": 2025, "max": 2025 } },
+    { "name": "PREVIOUS SCHOOL (If Transfer In)", "column": "K", "input_type": "text", "validation": { "allow_blank": true } }
+  ]
+}

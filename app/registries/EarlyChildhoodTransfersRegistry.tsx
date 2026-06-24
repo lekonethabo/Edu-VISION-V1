@@ -9,7 +9,17 @@ import { FilterBar } from "../shared/FilterBar";
 import { DataTable, ColumnConfig } from "../shared/DataTable";
 import { FormModal } from "../shared/FormModal";
 import { AddButton } from "../shared/ActionButtons";
-import { ECStudent } from "./EarlyChildhoodStudentsRegistry";
+interface ECStudent {
+  id: string;
+  nationalIdPassport: string;
+  surname?: string;
+  firstNames?: string;
+  nationality: string;
+  sex: string;
+  dobDay: string;
+  dobMonth: string;
+  dobYear: string;
+}
 
 export interface ECTransfer {
   id: string;
@@ -17,7 +27,7 @@ export interface ECTransfer {
   surname: string;
   studentNames: string;
   nationality: string;
-  sex: "Male" | "Female" | "";
+  sex: string;
   
   categoryLevel: string;
   transferStatus: "Transfer In" | "Transfer Out" | "";
@@ -30,9 +40,16 @@ export interface ECTransfer {
   lastUpdated: string;
 }
 
-const CATEGORY_LEVEL_OPTIONS = ["Baby", "Middle", "Pre-Unit"];
+const CATEGORY_LEVEL_OPTIONS = [
+  "Baby Care",
+  "Day Care/Nursery",
+  "Pre-primary (Excluding Reception)",
+  "Reception"
+];
 const SEX_OPTIONS = ["Male", "Female"];
-const NATIONALITY_OPTIONS = ["Citizen", "Non-Citizen"];
+const NATIONALITY_OPTIONS = [
+  "Botswana", "Eswatini", "Lesotho", "Namibia", "South Africa", "Zambia", "Zimbabwe", "India", "United Kingdom", "United Republic of Tanzania", "United States of America", "People's Republic of China", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Anguilla", "Antigua and Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia (Plurinational State of)", "Bosnia and Herzegovina", "Brazil", "British Virgin Islands", "Brunei Darussalam", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Cayman Islands", "Central African Republic", "Chad", "Chile", "China, Hong Kong Special Administrative Region", "China, Macao Special Administrative Region", "Colombia", "Comoros", "Congo", "Cook Islands", "Costa Rica", "Côte d'Ivoire", "Croatia", "Cuba", "Curaçao", "Cyprus", "Czechia", "Democratic People's Republic of Korea", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Holy See", "Honduras", "Hungary", "Iceland", "Indonesia", "Iran (Islamic Republic of)", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Lao People's Democratic Republic", "Latin America and the Caribbean not specified", "Latvia", "Lebanon", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia (Federated States of)", "Monaco", "Mongolia", "Montenegro", "Montserrat", "Morocco", "Mozambique", "Myanmar", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Puerto Rico", "Qatar", "Republic of Korea", "Republic of Moldova", "Romania", "Russian Federation", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten (Dutch part)", "Slovakia", "Slovenia", "Solomon Islands", "Solomar Islands", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syrian Arab Republic", "Tajikistan", "Thailand", "Timor-Leste", "Togo", "Tokelau", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Turks and Caicos Islands", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela (Bolivarian Republic of)", "Viet Nam", "Yemen"
+];
 const TRANSFER_STATUS_OPTIONS = ["Transfer In", "Transfer Out"];
 
 export const EarlyChildhoodTransfersRegistry: React.FC = () => {
@@ -96,34 +113,17 @@ export const EarlyChildhoodTransfersRegistry: React.FC = () => {
     nationalIdPassport: "",
     surname: "",
     studentNames: "",
-    nationality: "Citizen",
+    nationality: "Botswana",
     sex: "",
-    categoryLevel: "Pre-Unit",
+    categoryLevel: "Pre-primary (Excluding Reception)",
     transferStatus: "Transfer In",
     dateOfTransferDay: "",
     dateOfTransferMonth: "",
-    dateOfTransferYear: "",
+    dateOfTransferYear: "2025",
     previousSchool: ""
   };
 
   const [formData, setFormData] = useState<Partial<ECTransfer>>(defaultFormState);
-
-  // Auto-populate based on National ID
-  useEffect(() => {
-    if (formData.nationalIdPassport && formData.nationalIdPassport.length > 3) {
-      const foundStudent = studentsList.find(s => s.nationalIdPassport === formData.nationalIdPassport);
-      if (foundStudent && foundStudent.surname !== formData.surname) {
-        setFormData(prev => ({
-          ...prev,
-          surname: foundStudent.surname,
-          studentNames: foundStudent.studentNames,
-          nationality: foundStudent.nationality,
-          sex: foundStudent.sex
-        }));
-        triggerAlert("Student details merged from registry.", "success");
-      }
-    }
-  }, [formData.nationalIdPassport, studentsList]);
 
   const handleOpenAdd = () => {
     setSelectedTransfer(null);
@@ -179,7 +179,20 @@ export const EarlyChildhoodTransfersRegistry: React.FC = () => {
   };
 
   const handleFieldChange = (field: keyof ECTransfer, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      if (field === "nationalIdPassport" && value.length > 3) {
+        const foundStudent = studentsList.find(s => s.nationalIdPassport === value);
+        if (foundStudent) {
+          updated.surname = foundStudent.surname || "";
+          updated.studentNames = foundStudent.firstNames || "";
+          updated.nationality = foundStudent.nationality;
+          updated.sex = foundStudent.sex;
+          setTimeout(() => triggerAlert("Student details merged from registry.", "success"), 50);
+        }
+      }
+      return updated;
+    });
   };
 
   const handleNumberInput = (field: keyof ECTransfer, value: string, maxLen?: number) => {
@@ -213,6 +226,12 @@ export const EarlyChildhoodTransfersRegistry: React.FC = () => {
     <SectionContainer
       title="Early Childhood Transfers Registry"
       description="Manage records of toddlers transferring in and out of the centre."
+      action={
+        <AddButton 
+          onClick={handleOpenAdd} 
+          label="Log Transfer" 
+        />
+      }
     >
       {alert && (
         <div className={`p-4 rounded-xl border flex items-center gap-3 text-xs font-bold shadow-sm ${
@@ -267,35 +286,30 @@ export const EarlyChildhoodTransfersRegistry: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#000A14] p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6">
-        <FilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          searchPlaceholder="Search by ID or Name..."
-          filters={[
-            {
-              key: "categoryLevel",
-              label: "Category/Level",
-              value: activeFilters.categoryLevel as string,
-              options: ["All Levels", ...CATEGORY_LEVEL_OPTIONS],
-              onChange: (val) => setFilterVal("categoryLevel", val)
-            },
-            {
-              key: "transferStatus",
-              label: "Transfer Status",
-              value: activeFilters.transferStatus as string,
-              options: ["All Statuses", ...TRANSFER_STATUS_OPTIONS],
-              onChange: (val) => setFilterVal("transferStatus", val)
-            }
-          ]}
-          onClear={clearFilters}
-        />
-        <AddButton 
-          onClick={handleOpenAdd} 
-          label="Log Transfer" 
-          className="bg-[#00A3A3] hover:bg-[#002652] text-white" 
-        />
-      </div>
+      <FilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by ID or Name..."
+        filters={[
+          {
+            key: "categoryLevel",
+            label: "Category/Level",
+            value: activeFilters.categoryLevel as string,
+            options: CATEGORY_LEVEL_OPTIONS,
+            allLabel: "All Categories/Levels",
+            onChange: (val) => setFilterVal("categoryLevel", val)
+          },
+          {
+            key: "transferStatus",
+            label: "Transfer Status",
+            value: activeFilters.transferStatus as string,
+            options: TRANSFER_STATUS_OPTIONS,
+            allLabel: "All Transfer Statuses",
+            onChange: (val) => setFilterVal("transferStatus", val)
+          }
+        ]}
+        onClear={clearFilters}
+      />
 
       <DataTable
         data={filteredItems}

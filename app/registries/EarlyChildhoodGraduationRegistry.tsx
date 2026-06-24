@@ -48,14 +48,10 @@ export const EarlyChildhoodGraduationRegistry: React.FC = () => {
     setFilterVal,
     clearFilters,
     filteredItems
-  } = useFilters<ECGraduate>(items, ["nationalIdPassport", "surname", "studentNames"]);
-
-  if (activeFilters.sex === undefined) {
-    setFilterVal("sex", "");
-  }
-  if (activeFilters.specialEducationNeed === undefined) {
-    setFilterVal("specialEducationNeed", "");
-  }
+  } = useFilters<ECGraduate>(items, ["nationalIdPassport", "surname", "studentNames"], {
+    sex: "All",
+    specialEducationNeed: "All"
+  });
 
   const getComputedAge = (dobYear: string) => {
     if (!dobYear) return 0;
@@ -194,6 +190,12 @@ export const EarlyChildhoodGraduationRegistry: React.FC = () => {
     <SectionContainer
       title="Pre-Primary Graduation Registry"
       description="Manage records of toddlers completing early childhood education."
+      action={
+        <AddButton 
+          onClick={handleOpenAdd} 
+          label="Log Graduate" 
+        />
+      }
     >
       {alert && (
         <div className={`p-4 rounded-xl border flex items-center gap-3 text-xs font-bold shadow-sm ${
@@ -246,35 +248,30 @@ export const EarlyChildhoodGraduationRegistry: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#000A14] p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6">
-        <FilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          searchPlaceholder="Search by ID or Name..."
-          filters={[
-            {
-              key: "sex",
-              label: "Sex",
-              value: activeFilters.sex as string,
-              options: ["All Genders", ...SEX_OPTIONS],
-              onChange: (val) => setFilterVal("sex", val)
-            },
-            {
-              key: "specialEducationNeed",
-              label: "SEN",
-              value: activeFilters.specialEducationNeed as string,
-              options: ["All Status", ...YES_NO_OPTIONS],
-              onChange: (val) => setFilterVal("specialEducationNeed", val)
-            }
-          ]}
-          onClear={clearFilters}
-        />
-        <AddButton 
-          onClick={handleOpenAdd} 
-          label="Log Graduate" 
-          className="bg-[#00A3A3] hover:bg-[#002652] text-white" 
-        />
-      </div>
+      <FilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by ID or Name..."
+        filters={[
+          {
+            key: "sex",
+            label: "Sex",
+            value: (activeFilters.sex || "All") as string,
+            options: SEX_OPTIONS,
+            allLabel: "All Genders",
+            onChange: (val) => setFilterVal("sex", val)
+          },
+          {
+            key: "specialEducationNeed",
+            label: "SEN",
+            value: (activeFilters.specialEducationNeed || "All") as string,
+            options: YES_NO_OPTIONS,
+            allLabel: "All SEN Statuses",
+            onChange: (val) => setFilterVal("specialEducationNeed", val)
+          }
+        ]}
+        onClear={clearFilters}
+      />
 
       <DataTable
         data={filteredItems}

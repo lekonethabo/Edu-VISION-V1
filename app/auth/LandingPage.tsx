@@ -1,45 +1,30 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShieldCheck, User, Lock, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
+import { ShieldCheck, BookOpen, User, Lock, ArrowRight, CornerDownRight, GraduationCap } from "lucide-react";
 import { motion } from "motion/react";
 import { GeometricLogo } from "../components/GeometricLogo";
-import { signIn } from "next-auth/react";
 
 interface LandingPageProps {
   onLogin: (role: string, name: string) => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
-  const [regID, setRegID] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("admin@emis.gov.bw");
+  const [password, setPassword] = useState("••••••••");
+  const [role, setRole] = useState("School Administrator");
+  const [fullName, setFullName] = useState("K. NGWAKO (EMIS)");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    try {
-      const res = await signIn("credentials", {
-        regID,
-        password,
-        redirect: false,
-      });
-
-      if (res?.error) {
-        setError("Invalid User ID or Security Passcode. Please check your credentials and try again.");
-      } else {
-        // Successfully authenticated, progress to dashboard
-        onLogin("School Administrator", regID);
-      }
-    } catch (err) {
-      setError("A network error occurred. Please check your connection and try again.");
-    } finally {
-      setLoading(false);
-    }
+    onLogin(role, fullName);
   };
+
+  const usersPreset = [
+    { name: "K. NGWAKO (EMIS)", role: "School Administrator", mail: "admin@emis.gov.bw" },
+    { name: "INSPECTOR MOREMI", role: "Ministerial Inspector", mail: "moremi@gov.bw" },
+    { name: "HEADMASTER PAKANE", role: "School Principal", mail: "pakane@edu.bw" }
+  ];
 
   return (
     <div className="min-h-screen bg-snow flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
@@ -55,7 +40,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
               Edu-<span className="text-sea">VISION</span> EMIS
             </h1>
             <p className="text-xs text-slate-500 font-medium">
-              Botswana Educational Management Information System
+              Botswana Educational Management Indicators System
             </p>
           </div>
         </div>
@@ -71,40 +56,61 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
             </span>
           </div>
 
-          {error && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-xs text-red-700"
-            >
-              <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </motion.div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             
-            {/* Field: UserID */}
+            {/* Field: Role Preset */}
+            <div>
+              <label className="block text-[10.5px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                Acting Operational Role
+              </label>
+              <div className="grid grid-cols-1 gap-2">
+                {usersPreset.map((user) => (
+                  <button
+                    type="button"
+                    key={user.role}
+                    onClick={() => {
+                      setRole(user.role);
+                      setUsername(user.mail);
+                      setFullName(user.name);
+                    }}
+                    className={`text-left p-2.5 rounded-xl border text-xs flex justify-between items-center transition-colors cursor-pointer ${
+                      role === user.role
+                        ? "bg-prussian/5 border-prussian"
+                        : "border-slate-100 hover:bg-slate-50"
+                    }`}
+                  >
+                    <div>
+                      <span className="font-bold text-slate-850 block">{user.role}</span>
+                      <span className="text-[10px] text-slate-450 block">{user.name}</span>
+                    </div>
+                    {role === user.role && (
+                      <span className="text-xs font-bold text-prussian">&#10003;</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Field: Identification */}
             <div>
               <label className="block text-[10.5px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                UserID
+                Official Email Access
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                   <User className="w-4 h-4" />
                 </span>
                 <input
-                  type="text"
+                  type="email"
                   required
-                  placeholder="Enter UserID"
-                  value={regID}
-                  onChange={(e) => setRegID(e.target.value)}
-                  className="w-full text-xs pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-prussian outline-hidden text-slate-800"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full text-xs pl-9 pr-3 py-3 bg-slate-50 border rounded-xl focus:ring-1 focus:ring-prussian outline-hidden text-slate-800"
                 />
               </div>
             </div>
 
-            {/* Field: Security Passcode */}
+            {/* Field: Pass code */}
             <div>
               <label className="block text-[10.5px] font-bold text-slate-500 uppercase tracking-wider mb-1">
                 Security Passcode
@@ -116,10 +122,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
                 <input
                   type="password"
                   required
-                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full text-xs pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-prussian outline-hidden text-slate-800"
+                  className="w-full text-xs pl-9 pr-3 py-3 bg-slate-50 border rounded-xl outline-hidden text-slate-800"
                 />
               </div>
             </div>
@@ -127,20 +132,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
             {/* Enter workspace button */}
             <button
               type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3.5 mt-2 bg-prussian hover:bg-prussian/90 rounded-xl text-white font-bold text-xs uppercase cursor-pointer transition-colors shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 py-3.5 mt-2 bg-prussian hover:bg-prussian/90 rounded-xl text-white font-bold text-xs uppercase cursor-pointer transition-colors shadow-xs"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  <span>Verifying Credentials...</span>
-                </>
-              ) : (
-                <>
-                  <span>Enter Operational Dashboard</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              <span>Operational Dashboard</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </form>
         </div>

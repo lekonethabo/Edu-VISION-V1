@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { AlertCircle, ShieldAlert } from "lucide-react";
-import { AbusedStudent } from "../types";
+import React, { useState, useMemo } from "react";
+import { AlertCircle, ShieldAlert, Users } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useFilters } from "@/hooks/useFilters";
 import { INITIAL_ABUSED_STUDENTS } from "../constants";
@@ -12,21 +11,119 @@ import { DataTable, ColumnConfig } from "../shared/DataTable";
 import { FormModal } from "../shared/FormModal";
 import { AddButton } from "../shared/ActionButtons";
 
-const SOCIAL_STATUS_OPTIONS = ["Ordinary", "Orphan", "Needy", "Orphan & Needy", "Vulnerable"];
+import primaryConfig from "./configs/abused_primary.json";
+import juniorConfig from "./configs/abused_junior_secondary.json";
+import earlyConfig from "./configs/abused_early_childhood.json";
+import spedConfig from "./configs/abused_sped.json";
+import unifiedConfig from "./configs/abused_unified.json";
 
-export const AbusedStudentsRegistry: React.FC = () => {
-  const { items, addItem, updateItem, deleteItem } = useLocalStorage<AbusedStudent>(
-    "abused_students",
-    INITIAL_ABUSED_STUDENTS
+const JSON_CONFIGS: Record<string, any> = {
+  PRIMARY: primaryConfig,
+  JUNIOR: juniorConfig,
+  EARLY: earlyConfig,
+  SPED: spedConfig,
+  UNIFIED: unifiedConfig,
+};
+
+type ToolLevel = "PRIMARY" | "JUNIOR" | "EARLY" | "SPED" | "UNIFIED";
+
+export interface JsonField {
+  name: string;
+  column: string;
+  input_type: "text" | "select" | "number" | "multi-select";
+  options?: string[];
+  validation?: any;
+}
+
+export interface JsonConfig {
+  form_title: string;
+  fields: JsonField[];
+}
+
+export interface DynamicAbusedStudent {
+  id: string; // The primary ID mapping
+  [key: string]: any;
+}
+
+// Map the old mock data format to the excel column-based schema
+const mappedInitialPrimary = INITIAL_ABUSED_STUDENTS.map((item: any) => {
+  if (item["B"]) return item; // Already mapped
+  
+  // Convert old boolean flags to array
+  const abuseTypes: string[] = [];
+  if (item.abuseBullying === "Yes") abuseTypes.push("BULLYING");
+  if (item.abuseCorporal === "Yes") abuseTypes.push("ABUSE OF CORPORAL PUNISHMENT");
+  if (item.abuseHarassment === "Yes") abuseTypes.push("SEXUAL HARASSMENT");
+  if (item.abuseSexual === "Yes") abuseTypes.push("SEXUAL ABUSE");
+  if (item.abuseViolence === "Yes") abuseTypes.push("VIOLENCE");
+
+  return {
+    id: item.id || item["A"],
+    "A": item.id || item["A"],
+    "B": item.surname || item["B"],
+    "C": item.first || item["C"],
+    "D": item.nat || item["D"],
+    "E": item.sex || item["E"],
+    "F": item.reportDay || item.dobDay || item["F"],
+    "G": item.reportMonth || item.dobMonth || item["G"],
+    "H": item.reportYear || item.dobYear || item["H"],
+    "I": item.std || item["I"],
+    "J": item.typesOfAbuse || item["J"],
+    "K": abuseTypes
+  };
+});
+
+export const AbusedStudentsRegistry: React.FC<{ toolType?: ToolLevel }> = ({
+  toolType = "PRIMARY",
+}) => {
+  const [activeTool, setActiveTool] = useState<ToolLevel>(toolType);
+  const config = JSON_CONFIGS[activeTool] as JsonConfig;
+  const storageKey = activeTool.toLowerCase() + "_abused_students";
+
+  return (
+    <DynamicAbusedRegistryWrapper
+      key={activeTool}
+      activeTool={activeTool}
+      config={config}
+      storageKey={storageKey}
+      onChangeTool={setActiveTool}
+    />
+  );
+};
+
+const DynamicAbusedRegistryWrapper: React.FC<{
+  activeTool: ToolLevel;
+  config: JsonConfig;
+  storageKey: string;
+  onChangeTool: (tool: ToolLevel) => void;
+}> = ({ activeTool, config, storageKey, onChangeTool }) => {
+  const { items, addItem, updateItem, deleteItem } = useLocalStorage<DynamicAbusedStudent>(
+    storageKey,
+    activeTool === "PRIMARY" ? mappedInitialPrimary : []
   );
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [dossierOpen, setDossierOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedIncident, setSelectedIncident] = useState<AbusedStudent | null>(null);
+  const [selectedIncident, setSelectedIncident] = useState<DynamicAbusedStudent | null>(null);
   const [alert, setAlert] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [formData, setFormData] = useState<Partial<DynamicAbusedStudent>>({});
 
-  const [formData, setFormData] = useState<Partial<AbusedStudent>>({});
+  const triggerAlert = (message: string, type: "success" | "error") => {
+    setAlert({ message, type });
+    setTimeout(() => setAlert(null), 4000);
+  };
 
+  // Identify index properties
+  const idCol = config.fields.find(f => f.name.toUpperCase().includes("NATIONAL ID") || f.column === "A")?.column || "A";
+  const surnameCol = config.fields.find(f => f.name.toUpperCase().includes("SURNAME") || f.column === "B")?.column || "B";
+  const namesCol = config.fields.find(f => f.name.toUpperCase().includes("NAMES") || f.column === "C")?.column || "C";
+  const sexCol = config.fields.find(f => f.name.toUpperCase().includes("SEX") || f.name.toUpperCase().includes("GENDER") || f.column === "E")?.column || "E";
+  const abuseCol = config.fields.find(f => f.name.toUpperCase().includes("ABUSE") && (f.input_type === "multi-select" || f.column === "K" || f.column === "J"))?.column || "K";
+
+  const sexOptions = config.fields.find(f => f.column === sexCol)?.options || ["Male", "Female", "Other"];
+
+  // Filters hook setup
   const {
     searchQuery,
     setSearchQuery,
@@ -34,111 +131,126 @@ export const AbusedStudentsRegistry: React.FC = () => {
     setFilterVal,
     clearFilters,
     filteredItems
-  } = useFilters<AbusedStudent>(
-    items,
-    ["id", "surname", "first", "typesOfAbuse"],
-    { typesOfAbuse: "All" }
-  );
-
-  const triggerAlert = (message: string, type: "success" | "error") => {
-    setAlert({ message, type });
-    setTimeout(() => setAlert(null), 4000);
-  };
+  } = useFilters<DynamicAbusedStudent>(items, [idCol, surnameCol, namesCol], {
+    [sexCol]: "All"
+  });
 
   const filterConfigs = [
     {
-      key: "typesOfAbuse",
-      label: "Social Status",
-      value: activeFilters.typesOfAbuse || "All",
-      options: SOCIAL_STATUS_OPTIONS,
-      onChange: (val: string) => setFilterVal("typesOfAbuse", val)
+      key: sexCol,
+      label: "Gender",
+      value: activeFilters[sexCol] || "All",
+      options: sexOptions,
+      onChange: (val: string) => setFilterVal(sexCol, val)
     }
   ];
 
-  const columns: ColumnConfig<AbusedStudent>[] = [
-    { header: "National ID", accessorKey: "id", className: "font-mono font-bold text-sea" },
-    {
+  // Table Columns config dynamically loaded
+  const columns: ColumnConfig<DynamicAbusedStudent>[] = useMemo(() => {
+    const cols: ColumnConfig<DynamicAbusedStudent>[] = [];
+
+    cols.push({
+      header: "National ID",
+      accessorKey: idCol as any,
+      className: "font-mono font-bold text-sea"
+    });
+
+    cols.push({
       header: "Full Name",
-      render: (a) => (
+      render: (r) => (
         <div>
-          <span className="font-bold text-slate-900 dark:text-slate-100 truncate uppercase block">{a.surname}</span>
-          <span className="text-slate-500 dark:text-slate-400 text-xs block">{a.first}</span>
+          <span className="font-bold text-slate-900 dark:text-slate-100 truncate uppercase block">
+            {r[surnameCol]}
+          </span>
+          <span className="text-slate-500 dark:text-slate-400 text-xs block truncate max-w-[200px]">
+            {r[namesCol]}
+          </span>
         </div>
       )
-    },
-    { header: "Gender", accessorKey: "sex", className: "font-semibold" },
-    { header: "Standard Grade", accessorKey: "std" },
-    {
-      header: "Student Social Status",
-      render: (a) => (
-        <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 uppercase">
-          {a.typesOfAbuse || "Ordinary"}
-        </span>
-      )
-    },
-    {
-      header: "Abuse Types Flagged",
-      render: (a) => {
-        const types: string[] = [];
-        if (a.abuseBullying === "Yes") types.push("Bullying");
-        if (a.abuseCorporal === "Yes") types.push("Corporal Punishment");
-        if (a.abuseHarassment === "Yes") types.push("Sexual Harassment");
-        if (a.abuseSexual === "Yes") types.push("Sexual Abuse");
-        if (a.abuseViolence === "Yes") types.push("Violence");
+    });
 
-        return (
-          <div className="flex flex-wrap gap-1 max-w-[220px]">
-            {types.length > 0 ? (
-              types.map((t) => (
-                <span
-                  key={t}
-                  className="px-1.5 py-0.5 rounded-sm text-[9px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 uppercase tracking-tight whitespace-nowrap"
-                >
-                  {t}
-                </span>
-              ))
-            ) : (
-              <span className="text-slate-400 dark:text-slate-500 text-[10px] italic">None flagged</span>
-            )}
-          </div>
-        );
+    config.fields.forEach(f => {
+      if ([idCol, surnameCol, namesCol].includes(f.column)) return;
+      
+      // Skip dates breakdown if necessary, or render as plain
+      if (f.name.toUpperCase().includes("DATE") && (f.name.toUpperCase().includes("MONTH") || f.name.toUpperCase().includes("YEAR"))) {
+        return;
       }
-    },
-    { header: "Report Date", accessorKey: "dateReported", className: "font-mono" }
-  ];
 
+      cols.push({
+        header: f.name.toUpperCase().includes("DAY") ? f.name.replace(/[-(\s]*DAY[-)\s]*/gi, " Date") : f.name,
+        render: (r) => {
+          if (f.name.toUpperCase().includes("DAY")) {
+            const prefix = f.name.toUpperCase().split("DAY")[0];
+            const monthField = config.fields.find(m => m.name.toUpperCase().startsWith(prefix) && m.name.toUpperCase().includes("MONTH"));
+            const yearField = config.fields.find(y => y.name.toUpperCase().startsWith(prefix) && y.name.toUpperCase().includes("YEAR"));
+            if (monthField && yearField) {
+              const d = r[f.column];
+              const m = r[monthField.column];
+              const y = r[yearField.column];
+              if (d && m && y) {
+                return <span className="font-mono text-sm">{`${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`}</span>;
+              }
+            }
+          }
+
+          if (f.input_type === "multi-select") {
+            const selections = r[f.column];
+            if (!selections || !Array.isArray(selections) || selections.length === 0) {
+               return <span className="text-slate-400 dark:text-slate-500 text-[10px] italic">None flagged</span>;
+            }
+            return (
+              <div className="flex flex-wrap gap-1 max-w-[220px]">
+                {selections.map((t: string) => (
+                  <span
+                    key={t}
+                    className="px-1.5 py-0.5 rounded-sm text-[9px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 uppercase tracking-tight whitespace-nowrap"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            );
+          }
+
+          return (
+            <span className="text-sm text-slate-600 dark:text-slate-300">
+              {r[f.column] || "—"}
+            </span>
+          );
+        }
+      });
+    });
+
+    return cols;
+  }, [config, idCol, surnameCol, namesCol]);
+
+  // Form Submit handler
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.id || !formData.surname || !formData.first) {
-      triggerAlert("National ID / Passport, Surname and First Names are essential.", "error");
+    if (!formData[idCol] || !formData[surnameCol] || !formData[namesCol]) {
+      triggerAlert("National ID, Surname, and Student Full Names are required.", "error");
       return;
     }
 
-    const compiled: AbusedStudent = {
-      id: formData.id,
-      surname: String(formData.surname).toUpperCase(),
-      first: formData.first || "",
-      nat: formData.nat || "Botswana",
-      sex: formData.sex || "Female",
-      reportDay: formData.reportDay || 10,
-      reportMonth: formData.reportMonth || 5,
-      reportYear: formData.reportYear || 2024,
-      dateReported: formData.dateReported || "2024-05-10",
-      std: formData.std || "Std 1",
-      typesOfAbuse: formData.typesOfAbuse || "Ordinary",
-      abuseBullying: formData.abuseBullying || "No",
-      abuseCorporal: formData.abuseCorporal || "No",
-      abuseHarassment: formData.abuseHarassment || "No",
-      abuseSexual: formData.abuseSexual || "No",
-      abuseViolence: formData.abuseViolence || "No"
+    const compiled: DynamicAbusedStudent = {
+      id: formData[idCol],
+      ...formData,
+      [surnameCol]: String(formData[surnameCol]).toUpperCase()
     };
+
+    const exists = items.some(item => item.id === compiled.id);
 
     if (selectedIncident) {
       updateItem(compiled);
-      triggerAlert(`Incident profile for ${compiled.id} updated.`, "success");
+      triggerAlert("Incident profile updated successfully.", "success");
     } else {
+      if (exists) {
+        triggerAlert(`An incident record with ID ${compiled.id} already exists.`, "error");
+        return;
+      }
       addItem(compiled);
-      triggerAlert(`Logged new child protection report for student ${compiled.surname}.`, "success");
+      triggerAlert(`Logged new child protection report for ${compiled[surnameCol]}.`, "success");
     }
 
     setModalOpen(false);
@@ -146,25 +258,29 @@ export const AbusedStudentsRegistry: React.FC = () => {
     setFormData({});
   };
 
-  const handleEditClick = (a: AbusedStudent) => {
-    setSelectedIncident(a);
-    setFormData(a);
+  const handleEditClick = (r: DynamicAbusedStudent) => {
+    setSelectedIncident(r);
+    setFormData(r);
     setModalOpen(true);
   };
 
-  const handleDeleteClick = (a: AbusedStudent) => {
-    setSelectedIncident(a);
+  const handleDeleteClick = (r: DynamicAbusedStudent) => {
+    setSelectedIncident(r);
     setDeleteOpen(true);
   };
 
   const confirmDelete = () => {
     if (selectedIncident) {
       deleteItem(selectedIncident.id);
-      triggerAlert(`Successfully removed ${selectedIncident.id} from ledger.`, "success");
+      triggerAlert(`Successfully removed report for ${selectedIncident[surnameCol]}.`, "success");
       setDeleteOpen(false);
       setSelectedIncident(null);
     }
   };
+
+  const total = items.length;
+  const boys = items.filter(i => String(i[sexCol]).toUpperCase() === "MALE").length;
+  const girls = items.filter(i => String(i[sexCol]).toUpperCase() === "FEMALE").length;
 
   return (
     <div className="space-y-6">
@@ -184,24 +300,24 @@ export const AbusedStudentsRegistry: React.FC = () => {
       </div>
 
       <SectionContainer
-        title="Child Welfare Protection Registry"
+        title={config.form_title}
         description="Encrypted administrative registry cataloging student physical violence, bullying, or negligence reports."
         action={
           <AddButton
             label="Log Abuse Incident"
             onClick={() => {
               setSelectedIncident(null);
-              setFormData({ 
-                sex: "Female", 
-                typesOfAbuse: "Ordinary", 
-                std: "Std 1", 
-                dateReported: new Date().toISOString().split("T")[0],
-                abuseBullying: "No",
-                abuseCorporal: "No",
-                abuseHarassment: "No",
-                abuseSexual: "No",
-                abuseViolence: "No"
+              const initData: any = {};
+              config.fields.forEach(f => {
+                if (f.input_type === "multi-select") {
+                  initData[f.column] = [];
+                } else if (f.options && f.options.length > 0) {
+                  initData[f.column] = f.options[0];
+                } else {
+                  initData[f.column] = "";
+                }
               });
+              setFormData(initData);
               setModalOpen(true);
             }}
           />
@@ -223,165 +339,143 @@ export const AbusedStudentsRegistry: React.FC = () => {
         />
       </SectionContainer>
 
-      {/* Form Modal */}
+      {/* Form modal */}
       <FormModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={selectedIncident ? "Edit Abuse incident File" : "Record Child Protection Report"}
+        title={selectedIncident ? `Edit Incident: ${selectedIncident[surnameCol]}` : `Record Child Protection Report`}
         onSubmit={handleSubmit}
+        size="2xl"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Student National ID *</label>
-            <input
-              type="text"
-              required
-              disabled={!!selectedIncident}
-              value={formData.id || ""}
-              onChange={(e) => setFormData(prev => ({ ...prev, id: e.target.value }))}
-              placeholder="e.g. 083820022"
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100"
-            />
-          </div>
+          {config.fields.map(field => {
+            if (field.input_type === "multi-select") {
+              return (
+                <div key={field.column} className="col-span-1 md:col-span-2 border-t border-slate-250 dark:border-slate-800 pt-4 mt-2">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-prussian dark:text-sea mb-3">
+                    {field.name}
+                  </h4>
+                  <div className="flex flex-wrap gap-4">
+                    {field.options?.map(opt => {
+                      const currentVals = (formData[field.column] as string[]) || [];
+                      const isChecked = currentVals.includes(opt);
+                      return (
+                        <label key={opt} className="flex items-center gap-2 cursor-pointer bg-slate-50 dark:bg-slate-900 px-3 py-2 rounded border border-slate-200 dark:border-slate-800">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              const newVals = e.target.checked
+                                ? [...currentVals, opt]
+                                : currentVals.filter(v => v !== opt);
+                              setFormData(p => ({ ...p, [field.column]: newVals }));
+                            }}
+                            className="text-sea rounded focus:ring-sea"
+                          />
+                          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-tight">{opt}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            }
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Student Social Status</label>
-            <select
-              value={formData.typesOfAbuse || "Ordinary"}
-              onChange={(e) => setFormData(prev => ({ ...prev, typesOfAbuse: e.target.value as any }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100"
-            >
-              {SOCIAL_STATUS_OPTIONS.map(a => <option key={a} value={a}>{a}</option>)}
-            </select>
-          </div>
+            const isDayField = field.name.toUpperCase().includes("DAY");
+            if (isDayField) {
+              const prefix = field.name.toUpperCase().split("DAY")[0];
+              const monthField = config.fields.find(f => f.name.toUpperCase().startsWith(prefix) && f.name.toUpperCase().includes("MONTH"));
+              const yearField = config.fields.find(f => f.name.toUpperCase().startsWith(prefix) && f.name.toUpperCase().includes("YEAR"));
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Surname *</label>
-            <input
-              type="text"
-              required
-              value={formData.surname || ""}
-              onChange={(e) => setFormData(prev => ({ ...prev, surname: e.target.value }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded uppercase text-slate-800 dark:text-slate-100"
-            />
-          </div>
+              if (monthField && yearField) {
+                return (
+                  <div key={`${field.column}-group`} className="col-span-1 md:col-span-2 bg-slate-50/50 dark:bg-slate-900/30 p-4 border border-slate-100 dark:border-slate-800/80 rounded-lg">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+                      {prefix.replace(/[-(\s]+$/, "") || "Date"} *
+                    </label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[10px] uppercase font-semibold text-slate-400 mb-0.5">Day</label>
+                        <select
+                          required
+                          value={formData[field.column] || ""}
+                          onChange={(e) => setFormData(p => ({ ...p, [field.column]: Number(e.target.value) || e.target.value }))}
+                          className="w-full text-sm p-2.5 bg-white dark:bg-[#00050c] border border-slate-200 dark:border-slate-800 rounded focus:ring-1 focus:ring-sea text-slate-800 dark:text-slate-100"
+                        >
+                          <option value="">DD</option>
+                          {Array.from({ length: 31 }, (_, i) => String(i + 1)).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase font-semibold text-slate-400 mb-0.5">Month</label>
+                        <select
+                          required
+                          value={formData[monthField.column] || ""}
+                          onChange={(e) => setFormData(p => ({ ...p, [monthField.column]: Number(e.target.value) || e.target.value }))}
+                          className="w-full text-sm p-2.5 bg-white dark:bg-[#00050c] border border-slate-200 dark:border-slate-800 rounded focus:ring-1 focus:ring-sea text-slate-800 dark:text-slate-100"
+                        >
+                          <option value="">MM</option>
+                          {Array.from({ length: 12 }, (_, i) => String(i + 1)).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase font-semibold text-slate-400 mb-0.5">Year</label>
+                        <select
+                          required
+                          value={formData[yearField.column] || ""}
+                          onChange={(e) => setFormData(p => ({ ...p, [yearField.column]: Number(e.target.value) || e.target.value }))}
+                          className="w-full text-sm p-2.5 bg-white dark:bg-[#00050c] border border-slate-200 dark:border-slate-800 rounded focus:ring-1 focus:ring-sea text-slate-800 dark:text-slate-100"
+                        >
+                          <option value="">YYYY</option>
+                          {Array.from({ length: 2027 - 1900 }, (_, i) => String(2026 - i)).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+            }
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Firstnames *</label>
-            <input
-              type="text"
-              required
-              value={formData.first || ""}
-              onChange={(e) => setFormData(prev => ({ ...prev, first: e.target.value }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100"
-            />
-          </div>
+            const isMonthOrYearField = field.name.toUpperCase().includes("MONTH") || field.name.toUpperCase().includes("YEAR");
+            if (isMonthOrYearField) {
+              const prefix = field.name.toUpperCase().includes("MONTH") ? field.name.toUpperCase().split("MONTH")[0] : field.name.toUpperCase().split("YEAR")[0];
+              const dayField = config.fields.find(f => f.name.toUpperCase().startsWith(prefix) && f.name.toUpperCase().includes("DAY"));
+              if (dayField) return null;
+            }
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Standard Grade Assigned</label>
-            <select
-              value={formData.std || "Std 1"}
-              onChange={(e) => setFormData(prev => ({ ...prev, std: e.target.value }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100"
-            >
-              {["Std 1", "Std 2", "Std 3", "Std 4", "Std 5", "Std 6", "Std 7"].map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Incident Report Date</label>
-            <input
-              type="date"
-              value={formData.dateReported || ""}
-              onChange={(e) => setFormData(prev => ({ ...prev, dateReported: e.target.value }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Gender</label>
-            <select
-              value={formData.sex || "Female"}
-              onChange={(e) => setFormData(prev => ({ ...prev, sex: e.target.value as any }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100"
-            >
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
-
-          <div className="col-span-1 md:col-span-2 border-t border-slate-250 dark:border-slate-800 pt-4 mt-2">
-            <h4 className="text-xs font-black uppercase tracking-widest text-prussian dark:text-sea mb-3">
-              Confidential Abuse Types (Yes/No evaluation)
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Bullying</label>
-                <select
-                  value={formData.abuseBullying || "No"}
-                  onChange={(e) => setFormData(prev => ({ ...prev, abuseBullying: e.target.value as any }))}
-                  className="w-full text-xs p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-                >
-                  <option value="No">No</option>
-                  <option value="Yes">Yes</option>
-                </select>
+            return (
+              <div key={field.column}>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                  {field.name} {field.validation?.allow_blank === false ? "*" : ""}
+                </label>
+                {field.input_type === "select" ? (
+                  <select
+                    required={field.validation?.allow_blank === false}
+                    value={formData[field.column] || ""}
+                    onChange={(e) => setFormData(p => ({ ...p, [field.column]: e.target.value }))}
+                    className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-sea"
+                  >
+                    <option value="">-- Choose Option --</option>
+                    {field.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    type={field.input_type === "number" ? "number" : "text"}
+                    required={field.validation?.allow_blank === false}
+                    disabled={!!selectedIncident && field.column === idCol}
+                    value={formData[field.column] || ""}
+                    onChange={(e) => setFormData(p => ({ ...p, [field.column]: field.input_type === "number" ? Number(e.target.value) : e.target.value }))}
+                    placeholder={` ${field.name}`}
+                    className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-sea outline-hidden"
+                  />
+                )}
               </div>
-
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Abuse of Corp.</label>
-                <select
-                  value={formData.abuseCorporal || "No"}
-                  onChange={(e) => setFormData(prev => ({ ...prev, abuseCorporal: e.target.value as any }))}
-                  className="w-full text-xs p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-                >
-                  <option value="No">No</option>
-                  <option value="Yes">Yes</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Sex. Harassment</label>
-                <select
-                  value={formData.abuseHarassment || "No"}
-                  onChange={(e) => setFormData(prev => ({ ...prev, abuseHarassment: e.target.value as any }))}
-                  className="w-full text-xs p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-                >
-                  <option value="No">No</option>
-                  <option value="Yes">Yes</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Sexual Abuse</label>
-                <select
-                  value={formData.abuseSexual || "No"}
-                  onChange={(e) => setFormData(prev => ({ ...prev, abuseSexual: e.target.value as any }))}
-                  className="w-full text-xs p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-                >
-                  <option value="No">No</option>
-                  <option value="Yes">Yes</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Violence</label>
-                <select
-                  value={formData.abuseViolence || "No"}
-                  onChange={(e) => setFormData(prev => ({ ...prev, abuseViolence: e.target.value as any }))}
-                  className="w-full text-xs p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-                >
-                  <option value="No">No</option>
-                  <option value="Yes">Yes</option>
-                </select>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </FormModal>
 
-      {/* Delete Modal */}
+      {/* Delete Confirmation Modal */}
       <FormModal
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -394,10 +488,10 @@ export const AbusedStudentsRegistry: React.FC = () => {
         cancelLabel="Discard"
       >
         <div className="text-center py-4">
-          <AlertCircle className="w-12 h-12 text-golden mx-auto mb-3" />
+          <AlertCircle className="w-12 h-12 text-rose-500 mx-auto mb-3" />
           <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">Delete Incidental record?</h4>
           <p className="text-xs text-slate-500 mt-2">
-            Are you sure you want to delete this incident record? This action will overwrite database metrics.
+            Are you sure you want to permanently delete this incident record for <strong>{selectedIncident?.[surnameCol]}</strong>? This action will overwrite database metrics.
           </p>
         </div>
       </FormModal>
@@ -406,3 +500,4 @@ export const AbusedStudentsRegistry: React.FC = () => {
 };
 
 export default AbusedStudentsRegistry;
+

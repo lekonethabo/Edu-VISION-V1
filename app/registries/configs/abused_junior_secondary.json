@@ -1,0 +1,16 @@
+{
+  "form_title": "Junior Secondary Abused Students",
+  "fields": [
+    { "name": "NATIONAL ID/ PASSPORT", "column": "A", "input_type": "text" },
+    { "name": "SURNAME", "column": "B", "input_type": "text" },
+    { "name": "STUDENT NAMES", "column": "C", "input_type": "text" },
+    { "name": "NATIONALITY", "column": "D", "input_type": "text" },
+    { "name": "SEX", "column": "E", "input_type": "select", "options": ["Male", "Female"] },
+    { "name": "DATE OF BIRTH - DAY", "column": "F", "input_type": "number", "validation": { "min": 1, "max": 31 } },
+    { "name": "DATE OF BIRTH - MONTH", "column": "G", "input_type": "number", "validation": { "min": 1, "max": 12 } },
+    { "name": "DATE OF BIRTH - YEAR", "column": "H", "input_type": "number", "validation": { "min": 1900, "max": 2026 } },
+    { "name": "FORM", "column": "I", "input_type": "select", "options": ["Form 1", "Form 2", "Form 3"] },
+    { "name": "STUDENT SOCIAL STATUS", "column": "J", "input_type": "select", "options": ["Bursary", "Emotional/Psychological", "Social", "Social+Bursary", "Social+Emotional/Psychological", "Bursary + Emotional/Psychological", "None"] },
+    { "name": "TYPE OF ABUSE", "column": "K", "input_type": "multi-select", "options": ["Bullying", "Corporal Punishment", "Sexual Harassment", "Sexual Abuse", "Violence"] }
+  ]
+}

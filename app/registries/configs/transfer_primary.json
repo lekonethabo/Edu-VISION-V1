@@ -1,0 +1,22 @@
+{
+  "form_title": "Primary Student Transfer",
+  "fields": [
+    { "name": "NATIONAL ID/ PASSPORT", "column": "A", "input_type": "text", "validation": { "allow_blank": false } },
+    { "name": "SURNAME", "column": "B", "input_type": "text", "validation": { "allow_blank": false } },
+    { "name": "STUDENT NAMES", "column": "C", "input_type": "text", "validation": { "allow_blank": false } },
+    { 
+      "name": "NATIONALITY", 
+      "column": "D", 
+      "input_type": "select", 
+      "options": ["Botswana", "Eswatini", "Lesotho", "Namibia", "South Africa", "Zambia", "Zimbabwe", "India", "United Kingdom", "United Republic of Tanzania", "United States of America", "People's Republic of China", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Anguilla", "Antigua and Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia (Plurinational State of)", "Bosnia and Herzegovina", "Brazil", "British Virgin Islands", "Brunei Darussalam", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Cayman Islands", "Central African Republic", "Chad", "Chile", "China", "Hong Kong Special Administrative Region", "Colombia", "Comoros", "Congo", "Cook Islands", "Costa Rica", "Côte d'Ivoire", "Croatia", "Cuba", "Curaçao", "Cyprus", "Czechia", "Democratic People's Republic of Korea", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Holy See", "Honduras", "Hungary", "Iceland", "Indonesia", "Iran (Islamic Republic of)", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Lao People's Democratic Republic", "Latvia", "Lebanon", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia (Federated States of)", "Monaco", "Mongolia", "Montenegro", "Montserrat", "Morocco", "Mozambique", "Myanmar", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Puerto Rico", "Qatar", "Republic of Korea", "Republic of Moldova", "Romania", "Russian Federation", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten (Dutch part)", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syrian Arab Republic", "Tajikistan", "Thailand", "Timor-Leste", "Togo", "Tokelau", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Turks and Caicos Islands", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela (Bolivarian Republic of)", "Viet Nam", "Yemen"],
+      "validation": { "allow_blank": false } 
+    },
+    { "name": "SEX", "column": "E", "input_type": "select", "options": ["Male", "Female"], "validation": { "allow_blank": false } },
+    { "name": "STANDARD", "column": "F", "input_type": "select", "options": ["Std 1", "Std 2", "Std 3", "Std 4", "Std 5", "Std 6", "Std 7"], "validation": { "allow_blank": false } },
+    { "name": "TRANSFER STATUS", "column": "G", "input_type": "select", "options": ["Transfer In", "Transfer Out"], "validation": { "allow_blank": false } },
+    { "name": "DATE OF TRANSFER (DAY)", "column": "H", "input_type": "number", "validation": { "allow_blank": false, "min": 1, "max": 31 } },
+    { "name": "DATE OF TRANSFER (MONTH)", "column": "I", "input_type": "number", "validation": { "allow_blank": false, "min": 1, "max": 12 } },
+    { "name": "DATE OF TRANSFER (YEAR)", "column": "J", "input_type": "number", "validation": { "allow_blank": false, "min": 2025, "max": 2025 } },
+    { "name": "PREVIOUS SCHOOL, IF TRANSFER IN", "column": "K", "input_type": "text", "validation": { "allow_blank": true } }
+  ]
+}

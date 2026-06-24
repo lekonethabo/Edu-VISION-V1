@@ -145,25 +145,6 @@ export const TeachersSpecialProgrammeRegistry: React.FC = () => {
 
   const [formData, setFormData] = useState<Partial<ECTeachersSpecialProgramme>>(defaultFormState);
 
-  // Auto-populate logic
-  useEffect(() => {
-    if (formData.nationalIdPassport && formData.nationalIdPassport.length > 4) {
-      const existingStaff = staffItems.find(s => s.nationalIdPassport === formData.nationalIdPassport);
-      if (existingStaff && !selectedStaff) {
-        setFormData(prev => ({
-          ...prev,
-          surname: existingStaff.surname || prev.surname,
-          firstName: existingStaff.firstNames || prev.firstName, // Map firstNames to firstName
-          nationality: existingStaff.nationality || prev.nationality,
-          sex: existingStaff.sex || prev.sex,
-          dobDay: existingStaff.dobDay || prev.dobDay,
-          dobMonth: existingStaff.dobMonth || prev.dobMonth,
-          dobYear: existingStaff.dobYear || prev.dobYear,
-        }));
-      }
-    }
-  }, [formData.nationalIdPassport, staffItems, selectedStaff]);
-
   const handleOpenAdd = () => {
     setSelectedStaff(null);
     setFormData(defaultFormState);
@@ -212,7 +193,23 @@ export const TeachersSpecialProgrammeRegistry: React.FC = () => {
   };
 
   const handleFieldChange = (field: keyof ECTeachersSpecialProgramme, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      if (field === "nationalIdPassport" && value.length > 4) {
+        const existingStaff = staffItems.find(s => s.nationalIdPassport === value);
+        if (existingStaff && !selectedStaff) {
+          updated.surname = existingStaff.surname || prev.surname;
+          updated.firstName = existingStaff.firstNames || prev.firstName;
+          updated.nationality = existingStaff.nationality || prev.nationality;
+          updated.sex = existingStaff.sex || prev.sex;
+          updated.dobDay = existingStaff.dobDay || prev.dobDay;
+          updated.dobMonth = existingStaff.dobMonth || prev.dobMonth;
+          updated.dobYear = existingStaff.dobYear || prev.dobYear;
+          setTimeout(() => triggerAlert("Teacher found. Profile details synchronized.", "success"), 50);
+        }
+      }
+      return updated;
+    });
   };
 
   const columns: ColumnConfig<ECTeachersSpecialProgramme>[] = [
@@ -229,6 +226,12 @@ export const TeachersSpecialProgrammeRegistry: React.FC = () => {
     <SectionContainer
       title="Teachers Special Programme Registry"
       description="Manage early childhood educators with special education qualifications."
+      action={
+        <AddButton 
+          onClick={handleOpenAdd} 
+          label="Add SPED Teacher" 
+        />
+      }
     >
        {alert && (
         <div className={`p-4 rounded-xl border flex items-center gap-3 text-xs font-bold shadow-sm ${
@@ -281,42 +284,38 @@ export const TeachersSpecialProgrammeRegistry: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#000A14] p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6">
-        <FilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          searchPlaceholder="Search by ID or Name..."
-          filters={[
-            {
-              key: "sex",
-              label: "Sex",
-              value: activeFilters.sex as string,
-              options: ["All Genders", ...SEX_OPTIONS],
-              onChange: (val) => setFilterVal("sex", val)
-            },
-            {
-              key: "qualifiedInSpecialEducation",
-              label: "Specialization",
-              value: activeFilters.qualifiedInSpecialEducation as string,
-              options: ["All Specializations", ...SPECIALIZATIONS],
-              onChange: (val) => setFilterVal("qualifiedInSpecialEducation", val)
-            },
-            {
-              key: "contractType",
-              label: "Contract",
-              value: activeFilters.contractType as string,
-              options: ["All Contracts", ...CONTRACT_OPTIONS],
-              onChange: (val) => setFilterVal("contractType", val)
-            }
-          ]}
-          onClear={clearFilters}
-        />
-        <AddButton 
-          onClick={handleOpenAdd} 
-          label="Add SPED Teacher" 
-          className="bg-[#00A3A3] hover:bg-[#002652] text-white" 
-        />
-      </div>
+      <FilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by ID or Name..."
+        filters={[
+          {
+            key: "sex",
+            label: "Sex",
+            value: activeFilters.sex as string,
+            options: SEX_OPTIONS,
+            allLabel: "All Genders",
+            onChange: (val) => setFilterVal("sex", val)
+          },
+          {
+            key: "qualifiedInSpecialEducation",
+            label: "Specialization",
+            value: activeFilters.qualifiedInSpecialEducation as string,
+            options: SPECIALIZATIONS,
+            allLabel: "All Specializations",
+            onChange: (val) => setFilterVal("qualifiedInSpecialEducation", val)
+          },
+          {
+            key: "contractType",
+            label: "Contract Type",
+            value: activeFilters.contractType as string,
+            options: CONTRACT_OPTIONS,
+            allLabel: "All Contract Types",
+            onChange: (val) => setFilterVal("contractType", val)
+          }
+        ]}
+        onClear={clearFilters}
+      />
 
       <DataTable
         data={filteredItems}
@@ -348,7 +347,7 @@ export const TeachersSpecialProgrammeRegistry: React.FC = () => {
                   required
                   value={formData.nationalIdPassport || ""}
                   onChange={(e) => handleFieldChange("nationalIdPassport", e.target.value)}
-                  placeholder="Enter ID to auto-fill..."
+                  placeholder="ID to auto-fill..."
                   className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg outline-none text-[#002652] dark:text-slate-200"
                 />
               </div>

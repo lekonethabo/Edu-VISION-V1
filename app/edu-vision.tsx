@@ -16,18 +16,17 @@ import { AbusedStudentsRegistry } from "./registries/AbusedStudentsRegistry";
 import { SupportStaffRegistry } from "./registries/SupportStaffRegistry";
 import { CseAuditRegistry } from "./registries/CseAuditRegistry";
 import { EarlyChildhoodDashboard } from "./dashboard/EarlyChildhoodDashboard";
-import { EarlyChildhoodSchoolInfo } from "./registries/EarlyChildhoodSchoolInfo";
 import { EarlyChildhoodStudentsRegistry } from "./registries/EarlyChildhoodStudentsRegistry";
 import { EarlyChildhoodTransfersRegistry } from "./registries/EarlyChildhoodTransfersRegistry";
-import { EarlyChildhoodDropoutsRegistry } from "./registries/EarlyChildhoodDropoutsRegistry";
-import { EarlyChildhoodReEntrantsRegistry } from "./registries/EarlyChildhoodReEntrantsRegistry";
 import { EarlyChildhoodGraduationRegistry } from "./registries/EarlyChildhoodGraduationRegistry";
 import { EarlyChildhoodTeachingStaffRegistry } from "./registries/EarlyChildhoodTeachingStaffRegistry";
 import { EarlyChildhoodSupportStaffRegistry } from "./registries/EarlyChildhoodSupportStaffRegistry";
 import { TeacherMovementRegistry } from "./registries/TeacherMovementRegistry";
 import { TeachersSpecialProgrammeRegistry } from "./registries/TeachersSpecialProgrammeRegistry";
-import { EarlyChildhoodAbusedStudentsRegistry } from "./registries/EarlyChildhoodAbusedStudentsRegistry";
 import { EarlyChildhoodAccidentsRegistry } from "./registries/EarlyChildhoodAccidentsRegistry";
+import { SchoolFacilitiesRegistry } from "./registries/SchoolFacilitiesRegistry";
+import { MonitoringSupervisionRegistry } from "./registries/MonitoringSupervisionRegistry";
+import { ComprehensiveSexualityEducationRegistry } from "./registries/ComprehensiveSexualityEducationRegistry";
 import { TextbooksRegistry } from "./resources/TextbooksRegistry";
 import { FurnitureRegistry } from "./resources/FurnitureRegistry";
 import { EquipmentRegistry } from "./resources/EquipmentRegistry";
@@ -100,15 +99,15 @@ export const EduVisionPortal: React.FC = () => {
       case "ece_dashboard":
         return <EarlyChildhoodDashboard />;
       case "ece_school":
-        return <EarlyChildhoodSchoolInfo />;
+        return <SchoolInfoRegistry toolType="EARLY" />;// Removed EarlyChildhoodSchoolInfo as requested and mapped to consolidated component
       case "ece_students":
         return <EarlyChildhoodStudentsRegistry />;
       case "ece_transfers":
         return <EarlyChildhoodTransfersRegistry />;
       case "ece_dropouts":
-        return <EarlyChildhoodDropoutsRegistry />;
+        return <DropoutsRegistry toolType="EARLY" />;
       case "ece_re_entrants":
-        return <EarlyChildhoodReEntrantsRegistry />;
+        return <ReEntrantsRegistry toolType="EARLY" />;
       case "ece_graduates":
         return <EarlyChildhoodGraduationRegistry />;
       case "ece_teachers":
@@ -120,21 +119,75 @@ export const EduVisionPortal: React.FC = () => {
       case "ece_special_programme":
         return <TeachersSpecialProgrammeRegistry />;
       case "ece_abused_students":
-        return <EarlyChildhoodAbusedStudentsRegistry />;
+        return <AbusedStudentsRegistry toolType="EARLY" />;
       case "ece_accidents":
         return <EarlyChildhoodAccidentsRegistry />;
+      case "ece_facilities":
+        return <SchoolFacilitiesRegistry />;
+      case "ece_monitoring":
+        return <MonitoringSupervisionRegistry />;
+      case "ece_cse":
+        return <ComprehensiveSexualityEducationRegistry />;
       case "school":
-        return <SchoolInfoRegistry />;
+        let mappingSchool: any = {
+          "primary_data": "PRIMARY",
+          "junior_secondary": "JUNIOR",
+          "early_childhood": "EARLY",
+          "unified_private": "UNIFIED",
+          "sped_data": "SPED"
+        };
+        const resolvedSchoolType = selectedTool ? (mappingSchool[selectedTool] || "PRIMARY") : "PRIMARY";
+        return <SchoolInfoRegistry key={`school-${resolvedSchoolType}`} toolType={resolvedSchoolType} />;
       case "students":
-        return <StudentsRegistry />;
+        let mapping: any = {
+          "primary_data": "PRIMARY",
+          "junior_secondary": "JUNIOR",
+          "early_childhood": "EARLY",
+          "unified_private": "UNIFIED",
+          "sped_data": "SPED"
+        };
+        const resolvedToolType = selectedTool ? (mapping[selectedTool] || "PRIMARY") : "PRIMARY";
+        return <StudentsRegistry key={`students-${resolvedToolType}`} toolType={resolvedToolType} />;
       case "transfers":
-        return <TransfersRegistry />;
+        let mappingTransfers: any = {
+          "primary_data": "PRIMARY",
+          "junior_secondary": "JUNIOR",
+          "early_childhood": "EARLY",
+          "unified_private": "UNIFIED",
+          "sped_data": "SPED"
+        };
+        const resolvedTransfersType = selectedTool ? (mappingTransfers[selectedTool] || "PRIMARY") : "PRIMARY";
+        return <TransfersRegistry key={`transfers-${resolvedTransfersType}`} toolType={resolvedTransfersType} />;
       case "re_entrants":
-        return <ReEntrantsRegistry />;
+        let mappingReEntrants: any = {
+          "primary_data": "PRIMARY",
+          "junior_secondary": "JUNIOR",
+          "early_childhood": "EARLY",
+          "unified_private": "UNIFIED",
+          "sped_data": "SPED"
+        };
+        const resolvedReEntrantsType = selectedTool ? (mappingReEntrants[selectedTool] || "PRIMARY") : "PRIMARY";
+        return <ReEntrantsRegistry key={`re_entrants-${resolvedReEntrantsType}`} toolType={resolvedReEntrantsType} />;
       case "dropouts":
-        return <DropoutsRegistry />;
+        let mappingDropouts: any = {
+          "primary_data": "PRIMARY",
+          "junior_secondary": "JUNIOR",
+          "early_childhood": "EARLY",
+          "unified_private": "UNIFIED",
+          "sped_data": "SPED"
+        };
+        const resolvedDropoutsType = selectedTool ? (mappingDropouts[selectedTool] || "PRIMARY") : "PRIMARY";
+        return <DropoutsRegistry key={`dropouts-${resolvedDropoutsType}`} toolType={resolvedDropoutsType} />;
       case "abused_students":
-        return <AbusedStudentsRegistry />;
+        let mappingAbused: any = {
+          "primary_data": "PRIMARY",
+          "junior_secondary": "JUNIOR",
+          "early_childhood": "EARLY",
+          "unified_private": "UNIFIED",
+          "sped_data": "SPED"
+        };
+        const resolvedAbusedType = selectedTool ? (mappingAbused[selectedTool] || "PRIMARY") : "PRIMARY";
+        return <AbusedStudentsRegistry key={`abused-${resolvedAbusedType}`} toolType={resolvedAbusedType} />;
       case "teachers":
         return <TeachersRegistry />;
       case "support":

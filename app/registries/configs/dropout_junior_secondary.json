@@ -1,0 +1,17 @@
+{
+  "form_title": "Junior Secondary Dropouts",
+  "fields": [
+    { "name": "NATIONAL ID/ PASSPORT", "column": "A", "input_type": "text", "validation": { "allow_blank": true } },
+    { "name": "SURNAME", "column": "B", "input_type": "text", "validation": { "allow_blank": true } },
+    { "name": "STUDENT NAMES", "column": "C", "input_type": "text", "validation": { "allow_blank": true } },
+    { "name": "NATIONALITY", "column": "D", "input_type": "text", "validation": { "allow_blank": true } },
+    { "name": "SEX", "column": "E", "input_type": "select", "options": ["Male", "Female"], "validation": { "allow_blank": true } },
+    { "name": "DAY", "column": "F", "input_type": "number", "validation": { "allow_blank": true, "min": 1, "max": 31 } },
+    { "name": "MONTH", "column": "G", "input_type": "number", "validation": { "allow_blank": true, "min": 1, "max": 12 } },
+    { "name": "YEAR", "column": "H", "input_type": "number", "validation": { "allow_blank": true, "min": 2025, "max": 2025 } },
+    { "name": "FORM DROPPED OUT", "column": "I", "input_type": "select", "options": ["Form 1", "Form 2", "Form 3"], "validation": { "allow_blank": true } },
+    { "name": "REASONS FOR DROPPING OUT", "column": "J", "input_type": "select", "options": ["Abuse by Parent(s)", "Abuse by Teacher(s)", "Bullying", "Child Labor", "Corporal Punishment", "Death", "Desertion", "Expulsion", "Fees", "Illness", "Marriage", "Poor Performance", "Pregnancy", "Religion", "Substance Abuse", "Truancy", "Other"], "validation": { "allow_blank": true } },
+    { "name": "IF DEATH SPECIFY REASONS", "column": "K", "input_type": "text", "validation": { "allow_blank": true } },
+    { "name": "SPECIAL EDUCATION NEEDS", "column": "L", "input_type": "text", "validation": { "allow_blank": true } }
+  ]
+}

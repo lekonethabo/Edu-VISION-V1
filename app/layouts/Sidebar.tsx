@@ -27,7 +27,8 @@ import {
   ArrowLeft,
   GraduationCap,
   ArrowRightLeft,
-  Activity
+  Activity,
+  Eye
 } from "lucide-react";
 import { GeometricLogo } from "../components/GeometricLogo";
 
@@ -52,11 +53,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const isEce = selectedTool === "early_childhood";
 
+  const getExitLabel = () => {
+    switch (selectedTool) {
+      case "early_childhood":
+        return "Exit ECCE Hub";
+      case "primary_data":
+        return "Exit Primary Hub";
+      case "junior_secondary":
+        return "Exit Junior Hub";
+      case "unified_private":
+        return "Exit Unified Hub";
+      case "sped_data":
+        return "Exit SPED Hub";
+      default:
+        return "Exit Primary Hub";
+    }
+  };
+
   const primaryMenuItems = [
     { id: "dashboard", label: "Dashboard overview", icon: LayoutDashboard },
     { id: "school", label: "School Info", icon: Building },
     { id: "students", label: "Students Registry", icon: Users },
-    { id: "transfers", label: "Transfers", icon: ArrowLeftRight },
+    { id: "transfers", label: selectedTool === "sped_data" ? "Transition to Primary" : "Transfers", icon: ArrowLeftRight },
     { id: "re_entrants", label: "Re-entrants", icon: UserPlus },
     { id: "dropouts", label: "Dropouts", icon: UserMinus },
     { id: "abused_students", label: "Abused Students", icon: ShieldAlert },
@@ -73,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const eceMenuItems = [
-    { id: "ece_dashboard", label: "ECE Dashboard overview", icon: LayoutDashboard },
+    { id: "ece_dashboard", label: "ECCE Dashboard overview", icon: LayoutDashboard },
     { id: "ece_school", label: "School Info", icon: Building },
     { id: "ece_students", label: "Students Registry", icon: Users },
     { id: "ece_transfers", label: "Transfers Registry", icon: ArrowLeftRight },
@@ -86,6 +104,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "ece_abused_students", label: "Abused Students", icon: ShieldAlert },
     { id: "ece_accidents", label: "Accidents", icon: Activity },
     { id: "ece_support", label: "Support Staff", icon: Users },
+    { id: "ece_facilities", label: "School Facilities", icon: Hammer },
+    { id: "ece_monitoring", label: "Monitoring & Supervision", icon: Eye },
+    { id: "ece_cse", label: "CSE & Life Skills", icon: Heart },
   ];
 
   const menuItems = isEce ? eceMenuItems : primaryMenuItems;
@@ -133,10 +154,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <button
           onClick={onExit}
           id="btn-sidebar-exit"
-          className="flex items-center justify-center gap-2 bg-[#001c3d] hover:bg-golden/20 hover:text-white text-slate-300 px-4 py-2 rounded text-xs font-bold transition-all duration-150 mb-6 cursor-pointer border border-[#002f66]"
+          className="flex items-center justify-center gap-2 bg-amber-600/10 hover:bg-amber-600/20 text-amber-400 hover:text-amber-300 px-4 py-2 rounded text-xs font-bold transition-all duration-150 mb-6 cursor-pointer border border-amber-500/30 hover:border-amber-500/60 shadow-lg shadow-amber-950/20"
         >
-          <ArrowLeft className="w-3.5 h-3.5 text-sea" />
-          <span>{isEce ? "Exit ECE Portal Hub" : "Exit Standard 1-7 Registry"}</span>
+          <ArrowLeft className="w-3.5 h-3.5 text-amber-400" />
+          <span>{getExitLabel()}</span>
         </button>
 
         {/* Sidebar Nav Items */}
@@ -170,7 +191,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           <div>
             <span className="text-[10px] uppercase font-mono font-bold text-slate-400 tracking-widest block mb-2 px-1 text-left">
-              {isEce ? "ECE Core Workspaces" : "Operational Registries"}
+              {isEce ? "ECCE Core Workspaces" : "Operational Registries"}
             </span>
             <ul className="space-y-1">
               {menuItems.slice(1).map((item) => (

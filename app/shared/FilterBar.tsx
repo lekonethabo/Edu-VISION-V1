@@ -9,6 +9,7 @@ export interface FilterSelectConfig {
   value: string;
   options: string[] | { label: string; value: string }[];
   onChange: (value: string) => void;
+  allLabel?: string;
 }
 
 interface FilterBarProps {
@@ -75,7 +76,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 onChange={(e) => f.onChange(e.target.value)}
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-prussian dark:text-slate-100"
               >
-                <option value="All">All {f.label}s</option>
+                <option value="All">{(f as any).allLabel || `All ${f.label}s`}</option>
                 {f.options.map((option) => {
                   const optVal = typeof option === "string" ? option : option.value;
                   const optLabel = typeof option === "string" ? option : option.label;
