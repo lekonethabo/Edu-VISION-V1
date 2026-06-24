@@ -16,7 +16,6 @@
     { "name": "FORM 3 STREAMS", "column": "M", "input_type": "number" },
     { "name": "SHIFTING", "column": "N", "input_type": "select", "options": ["Yes", "No"] },
     { "name": "BOARDING", "column": "O", "input_type": "select", "options": ["Yes", "No"] },
-    { "name": "INTERNET INFRASTRUCTURE", "column": "P", "input_type": "select", "options": ["None", "Local Area Network (LAN)", "Wi-Fi", "LAN + Wi-Fi"] },
     { "name": "TYPE OF INTERNET", "column": "Q", "input_type": "select", "options": ["None", "Local Area Network (LAN)", "Wi-Fi", "LAN + Wi-Fi"] },
     { "name": "SPEED/ BANDWIDTH", "column": "R", "input_type": "select", "options": ["<5 Mbps", "5-20 Mbps", "21-40 Mbps", "41-60 Mbps", "61-80 Mbps", "81-100 Mbps", ">100 Mbps", "N/A"] },
     { "name": "INTERNET COVERAGE", "column": "S", "input_type": "select", "options": ["Partial", "Full Coverage", "N/A"] },

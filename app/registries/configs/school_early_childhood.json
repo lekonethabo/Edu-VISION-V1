@@ -19,7 +19,6 @@
     { "name": "HALF DAY", "column": "P", "input_type": "text"},
     { "name": "FULL DAY", "column": "Q", "input_type": "text"},
     { "name": "MEALS GIVEN TO CHILDREN", "column": "R", "input_type": "select", "options": ["Breakfast", "Lunch", "Snack", "Breakfast + Lunch", "Breakfast + Lunch + Snack", "Breakfast + Snack", "Lunch + Snack", "None"] },
-    { "name": "INTERNET INFRASTRUCTURE", "column": "S", "input_type": "select", "options": ["None", "Local Area Network (LAN)", "WIFI", "WIFI & LAN"] },
     { "name": "TYPE OF INTERNET CONNECTION", "column": "T", "input_type": "select", "options": ["None", "Local Area Network (LAN)", "WIFI", "WIFI & LAN"] },
     { "name": "SPEED/ BANDWIDTH", "column": "U", "input_type": "select", "options": ["<5 Mbps", "5 - 20 Mbps", "21 - 40 Mbps", "41 - 60 Mbps", "61 - 80 Mbps", "81 - 100 Mbps", ">100 Mbps"] },
     { "name": "COVERAGE", "column": "V", "input_type": "select", "options": ["N/A", "Partial", "Full"] },

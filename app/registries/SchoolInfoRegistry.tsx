@@ -196,7 +196,7 @@ const DynamicSchoolInfoRegistryWrapper: React.FC<{
     config.fields.find((f) => f.name.includes("WATER"))?.column || "AA";
   const internetCol =
     config.fields.find(
-      (f) => f.name.includes("INTERNET INFRASTRUCTURE") || f.name.includes("TYPE OF INTERNET CONNECTION")
+      (f) => f.name.includes("TYPE OF INTERNET CONNECTION")
     )?.column || "S";
 
   // 4. Listing Filters via useFilters hook
