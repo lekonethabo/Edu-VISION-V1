@@ -43,8 +43,8 @@ export const EduVisionPortal: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isToolLaunched, setIsToolLaunched] = useState<boolean>(false);
   const [selectedTool, setSelectedTool] = useState<"primary_data" | "early_childhood" | string | null>(null);
-  const [userRole, setUserRole] = useState<string>("School Administrator");
-  const [userName, setUserName] = useState("K. NGWAKO (EMIS)");
+  const [userRole, setUserRole] = useState<string>("");
+  const [userName, setUserName] = useState("");
   const [activeTab, setActiveTab2] = useState<string>("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [isDark, setIsDark] = useState<boolean>(false);

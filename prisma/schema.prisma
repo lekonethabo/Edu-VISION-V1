@@ -21,3 +21,12 @@ model User {
   regID    String @id @unique
   password String
 }
+
+model School {
+  id        String   @id @unique
+  name      String
+  toolType  String
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

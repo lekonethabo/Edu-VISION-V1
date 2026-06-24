@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   AlertCircle,
   School,
@@ -11,8 +11,13 @@ import {
   Trash2,
   FileText
 } from "lucide-react";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useFilters } from "@/hooks/useFilters";
+import {
+  getSchoolsAction,
+  addSchoolAction,
+  updateSchoolAction,
+  deleteSchoolAction
+} from "./schoolActions";
 import { SectionContainer } from "../shared/SectionContainer";
 import { FilterBar } from "../shared/FilterBar";
 import { DataTable, ColumnConfig } from "../shared/DataTable";
@@ -134,9 +139,24 @@ const DynamicSchoolInfoRegistryWrapper: React.FC<{
   storageKey: string;
   onChangeTool: (tool: ToolLevel) => void;
 }> = ({ activeTool, config, storageKey, onChangeTool }) => {
-  // 1. Storage & Persistence
-  const { items, addItem, updateItem, deleteItem } =
-    useLocalStorage<DynamicSchool>(storageKey, []);
+  // 1. Database Persistence
+  const [items, setItems] = useState<DynamicSchool[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState<boolean>(true);
+
+  const fetchSchools = async () => {
+    setIsDataLoading(true);
+    const result = await getSchoolsAction(activeTool);
+    if (result.success && result.data) {
+      setItems(result.data);
+    } else {
+      triggerAlert(result.error || "Failed to load school profiles.", "error");
+    }
+    setIsDataLoading(false);
+  };
+
+  useEffect(() => {
+    fetchSchools();
+  }, [activeTool]);
 
   // 2. UI States
   const [modalOpen, setModalOpen] = useState(false);
@@ -253,7 +273,7 @@ const DynamicSchoolInfoRegistryWrapper: React.FC<{
   }, [nameCol, regCol, districtCol, regionCol]);
 
   // Handle Add/Edit Form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData[nameCol] || !formData[regCol]) {
       triggerAlert(
@@ -265,20 +285,22 @@ const DynamicSchoolInfoRegistryWrapper: React.FC<{
 
     const compiled: DynamicSchool = { id: formData[regCol], ...formData };
 
-    const exists = items.some((item) => item.id === compiled.id);
     if (selectedSchool) {
-      updateItem(compiled);
-      triggerAlert(`Record for ${compiled[nameCol]} updated successfully.`, "success");
-    } else {
-      if (exists) {
-        triggerAlert(
-          `A school profile with Reg Number ${compiled[regCol]} already exists.`,
-          "error",
-        );
-        return;
+      const res = await updateSchoolAction(compiled, activeTool);
+      if (res.success) {
+        triggerAlert(`Record for ${compiled[nameCol]} updated successfully.`, "success");
+        fetchSchools();
+      } else {
+        triggerAlert(res.error || "Failed to update record.", "error");
       }
-      addItem(compiled);
-      triggerAlert(`New institutional profile for ${compiled[nameCol]} registered.`, "success");
+    } else {
+      const res = await addSchoolAction(compiled, activeTool);
+      if (res.success) {
+        triggerAlert(`New institutional profile for ${compiled[nameCol]} registered.`, "success");
+        fetchSchools();
+      } else {
+        triggerAlert(res.error || "Failed to register school.", "error");
+      }
     }
 
     setModalOpen(false);
@@ -302,10 +324,15 @@ const DynamicSchoolInfoRegistryWrapper: React.FC<{
     setDeleteOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (selectedSchool) {
-      deleteItem(selectedSchool.id);
-      triggerAlert(`Institutional profile for ${selectedSchool[nameCol]} deleted.`, "success");
+      const res = await deleteSchoolAction(selectedSchool.id);
+      if (res.success) {
+        triggerAlert(`Institutional profile for ${selectedSchool[nameCol]} deleted.`, "success");
+        fetchSchools();
+      } else {
+        triggerAlert(res.error || "Failed to delete school profile.", "error");
+      }
       setDeleteOpen(false);
       setSelectedSchool(null);
     }
