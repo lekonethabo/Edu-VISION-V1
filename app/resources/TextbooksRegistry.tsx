@@ -84,7 +84,6 @@ export const TextbooksRegistry: React.FC = () => {
           initMatrix[std] = {};
           ALL_SUBJECTS.forEach(sub => { initMatrix[std][sub] = 0; });
        });
-       // eslint-disable-next-line react-hooks/set-state-in-effect
        setMatrix(initMatrix);
        setIsLoaded(true);
     }

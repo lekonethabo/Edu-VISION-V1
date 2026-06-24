@@ -1,846 +1,603 @@
 "use client";
 
-import React, { useState } from "react";
-import { 
-  AlertCircle, 
-  School, 
-  Save, 
-  Bolt, 
-  Droplets, 
-  MapPin, 
-  Globe, 
-  Edit3, 
-  Eye, 
-  CheckCircle, 
-  AlertTriangle, 
-  Compass, 
-  Network, 
-  Activity, 
-  Layers, 
-  ShieldCheck, 
-  PhoneCall, 
-  BookOpen
+import React, { useState, useMemo } from "react";
+import {
+  AlertCircle,
+  School,
+  Activity,
+  Network,
+  Zap,
+  Globe,
+  Trash2,
+  FileText
 } from "lucide-react";
-import { SchoolInfo } from "../types";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { INITIAL_SCHOOL_INFO } from "../constants";
+import { useFilters } from "@/hooks/useFilters";
 import { SectionContainer } from "../shared/SectionContainer";
+import { FilterBar } from "../shared/FilterBar";
+import { DataTable, ColumnConfig } from "../shared/DataTable";
+import { FormModal } from "../shared/FormModal";
+import { AddButton } from "../shared/ActionButtons";
 
-export const BOTSWANA_SUB_REGIONS = [
-  "Bobirwa",
-  "Boteti",
-  "Charles Hill",
-  "Chobe",
-  "Francistown",
-  "Gaborone",
-  "Gantsi",
-  "Goodhope",
-  "Gumare",
-  "Jwaneng/ Mabutsane",
-  "Kanye",
-  "Kgalagadi North",
-  "Kgalagadi South",
-  "Kgatleng",
-  "Lentsweletau",
-  "Letlhakeng",
-  "Lobatse",
-  "Mahalapye",
-  "Maun",
-  "Mogoditshane/ Thamaga",
-  "Molepolole",
-  "Moshupa",
-  "North-East",
-  "Palapye",
-  "Sefhare",
-  "Selibe Phikwe",
-  "Serowe",
-  "Shakawe",
-  "Shoshong",
-  "South East",
-  "Tonota",
-  "Tutume"
-];
+import primaryConfig from "./configs/school_primary.json";
+import juniorConfig from "./configs/school_junior_secondary.json";
+import earlyConfig from "./configs/school_early_childhood.json";
+import spedConfig from "./configs/school_sped.json";
+import unifiedConfig from "./configs/school_unified.json";
 
-export const SchoolInfoRegistry: React.FC = () => {
-  const { items, updateItem } = useLocalStorage<SchoolInfo>(
-    "school_info",
-    [INITIAL_SCHOOL_INFO]
-  );
+const JSON_CONFIGS: Record<string, any> = {
+  PRIMARY: primaryConfig,
+  JUNIOR: juniorConfig,
+  EARLY: earlyConfig,
+  SPED: spedConfig,
+  UNIFIED: unifiedConfig,
+};
 
-  const schoolData = items[0] || INITIAL_SCHOOL_INFO;
-  const [formData, setFormData] = useState<SchoolInfo>({ ...schoolData });
-  const [isEditMode, setIsEditMode] = useState<boolean>(false);
-  const [alert, setAlert] = useState<{ message: string; type: "success" | "error" } | null>(null);
+type ToolLevel = "PRIMARY" | "JUNIOR" | "EARLY" | "SPED" | "UNIFIED";
 
-  const triggerAlert = (message: string, type: "success" | "error") => {
-    setAlert({ message, type });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    setTimeout(() => setAlert(null), 5000);
-  };
+export interface JsonField {
+  name: string;
+  column: string;
+  input_type: "text" | "select" | "number";
+  options?: string[];
+  validation?: any;
+  default?: string;
+}
 
-  const handleFieldChange = (key: keyof SchoolInfo, val: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [key]: val
-    }));
-  };
+export interface JsonConfig {
+  form_title: string;
+  fields: JsonField[];
+}
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
+export interface DynamicSchool {
+  id: string; // The primary ID mapping (School Registration Number)
+  [key: string]: any;
+}
 
-    // Sum of streams validation
-    const sumStreams = 
-      Number(formData.streamsStd1 || 0) +
-      Number(formData.streamsStd2 || 0) +
-      Number(formData.streamsStd3 || 0) +
-      Number(formData.streamsStd4 || 0) +
-      Number(formData.streamsStd5 || 0) +
-      Number(formData.streamsStd6 || 0) +
-      Number(formData.streamsStd7 || 0);
+const getFieldSection = (fieldName: string): string => {
+  const name = fieldName.toUpperCase();
+  
+  // Section 1: Basic Institutional & Administrative Information
+  if (
+    name.includes("SCHOOL NAME") ||
+    name.includes("DISTRICT") ||
+    name.includes("EDUCATION REGION") ||
+    name.includes("SUB-REGION") ||
+    name.includes("VILLAGE/ CITY/ TOWN") ||
+    name.includes("CITY/TOWN/ VILLAGE") ||
+    name.includes("EXTENSION/ WARD") ||
+    name.includes("EXTENSION/WARD") ||
+    name.includes("TYPE OF SCHOOL") ||
+    name.includes("TYPE OF CENTRE/ SCHOOL") ||
+    name.includes("SCHOOL REGISTRATION NUMBER") ||
+    name.includes("CENTRE REGISTRATION NUMBER") ||
+    name.includes("CENTRE REGISTRATION STATUS") ||
+    name.includes("LEVEL") ||
+    name.includes("YEAR OF ESTABLISHMENT") ||
+    name.includes("STATUS OF PREMISES") ||
+    name.includes("TYPE OF PREMISES") ||
+    name.includes("SERVICE PROVIDED") ||
+    name.includes("OWNERSHIP") ||
+    name.includes("SCHOOL FEES")
+  ) {
+    return "Section 1: Basic Institutional & Administrative Information";
+  }
+  
+  // Section 2: Streams, Classrooms & Enrollment Organization
+  if (
+    name.includes("STREAMS") ||
+    name.includes("STANDARD") ||
+    name.includes("FORM ") ||
+    name.includes("MULTIGRADE") ||
+    name.includes("ENROLMENT") ||
+    name.includes("STIMULATION") ||
+    name.includes("ACADEMIC STREAMS") ||
+    name.includes("TRANSITION STREAMS")
+  ) {
+    return "Section 2: Streams, Classrooms & Enrollment Organization";
+  }
 
-    // If total streams is set manually, let's sync or warn
-    const typedTotal = Number(formData.totalStreams || 0);
+  // Section 4: Contact & Communication Details
+  if (
+    name.includes("TELEPHONE") ||
+    name.includes("FAX") ||
+    name.includes("EMAIL")
+  ) {
+    return "Section 4: Contact & Communication Details";
+  }
 
-    let updatedData = { ...formData };
-    if (sumStreams !== typedTotal) {
-      updatedData.totalStreams = sumStreams;
-      updatedData.streamCheck = "Error / Review Needed";
-    } else {
-      updatedData.streamCheck = "Verified";
-    }
+  // Section 3: Institutional Services, Infrastructure & Utilities
+  return "Section 3: Institutional Services, Infrastructure & Utilities";
+};
 
-    updateItem(updatedData);
-    setFormData(updatedData);
-    setIsEditMode(false);
-    triggerAlert("Institutional registration parameters updated successfully with calculated streams.", "success");
-  };
-
-  const handleReset = () => {
-    setFormData({ ...schoolData });
-    setIsEditMode(false);
-    triggerAlert("Changes discarded. Reverted to last saved institutional profile.", "error");
-  };
-
-  // Calculate streams sum dynamically for informational display
-  const currentTotalStreams = 
-    Number(formData.streamsStd1 || 0) +
-    Number(formData.streamsStd2 || 0) +
-    Number(formData.streamsStd3 || 0) +
-    Number(formData.streamsStd4 || 0) +
-    Number(formData.streamsStd5 || 0) +
-    Number(formData.streamsStd6 || 0) +
-    Number(formData.streamsStd7 || 0);
+export const SchoolInfoRegistry: React.FC<{ toolType?: ToolLevel }> = ({
+  toolType = "PRIMARY",
+}) => {
+  const [activeTool, setActiveTool] = useState<ToolLevel>(toolType);
+  const config = JSON_CONFIGS[activeTool] as JsonConfig;
+  const storageKey = activeTool.toLowerCase() + "_school_info";
 
   return (
-    <div className="space-y-6" id="school-info-registry-section">
-      {/* Dynamic Alerts */}
+    <DynamicSchoolInfoRegistryWrapper
+      key={activeTool}
+      activeTool={activeTool}
+      config={config}
+      storageKey={storageKey}
+      onChangeTool={setActiveTool}
+    />
+  );
+};
+
+const DynamicSchoolInfoRegistryWrapper: React.FC<{
+  activeTool: ToolLevel;
+  config: JsonConfig;
+  storageKey: string;
+  onChangeTool: (tool: ToolLevel) => void;
+}> = ({ activeTool, config, storageKey, onChangeTool }) => {
+  // 1. Storage & Persistence
+  const { items, addItem, updateItem, deleteItem } =
+    useLocalStorage<DynamicSchool>(storageKey, []);
+
+  // 2. UI States
+  const [modalOpen, setModalOpen] = useState(false);
+  const [dossierOpen, setDossierOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedSchool, setSelectedSchool] = useState<DynamicSchool | null>(
+    null,
+  );
+  const [alert, setAlert] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+
+  // 3. Form Field State
+  const [formData, setFormData] = useState<Partial<DynamicSchool>>({});
+
+  // Trigger alert notifications helper
+  const triggerAlert = (message: string, type: "success" | "error") => {
+    setAlert({ message, type });
+    setTimeout(() => setAlert(null), 5000); // Adheres to 5.0 seconds (5000ms) toast threshold from AGENTS.md
+  };
+
+  // Find column maps from config fields
+  const nameCol =
+    config.fields.find((f) => f.name.includes("SCHOOL NAME"))?.column || "A";
+  const regCol =
+    config.fields.find((f) => f.name.includes("REGISTRATION NUMBER"))?.column || "H";
+  const districtCol =
+    config.fields.find((f) => f.name.includes("DISTRICT"))?.column || "B";
+  const regionCol =
+    config.fields.find((f) => f.name.includes("REGION") && !f.name.includes("SUB"))?.column || "C";
+  const boardingCol =
+    config.fields.find((f) => f.name.includes("BOARDING"))?.column || "Q";
+  const electricityCol =
+    config.fields.find((f) => f.name.includes("ELECTRICITY"))?.column || "Z";
+  const waterCol =
+    config.fields.find((f) => f.name.includes("WATER"))?.column || "AA";
+  const internetCol =
+    config.fields.find(
+      (f) => f.name.includes("INTERNET INFRASTRUCTURE") || f.name.includes("TYPE OF INTERNET CONNECTION")
+    )?.column || "S";
+
+  // 4. Listing Filters via useFilters hook
+  const {
+    searchQuery,
+    setSearchQuery,
+    activeFilters,
+    setFilterVal,
+    clearFilters,
+    filteredItems,
+  } = useFilters<DynamicSchool>(items, [nameCol, regCol], {
+    district: "All",
+    region: "All",
+  });
+
+  const districtOptions = useMemo(() => {
+    return Array.from(new Set(items.map((i) => i[districtCol]).filter(Boolean)));
+  }, [items, districtCol]);
+
+  const regionOptions = useMemo(() => {
+    return Array.from(new Set(items.map((i) => i[regionCol]).filter(Boolean)));
+  }, [items, regionCol]);
+
+  const filterConfigs = [
+    {
+      key: "district",
+      label: "District",
+      value: activeFilters.district || "All",
+      options: districtOptions,
+      onChange: (val: string) => setFilterVal("district", val),
+    },
+    {
+      key: "region",
+      label: "Region",
+      value: activeFilters.region || "All",
+      options: regionOptions,
+      onChange: (val: string) => setFilterVal("region", val),
+    },
+  ];
+
+  // Table Columns Setup dynamically generated from JSON
+  const columns: ColumnConfig<DynamicSchool>[] = useMemo(() => {
+    const cols: ColumnConfig<DynamicSchool>[] = [];
+
+    // School Name (Column A)
+    cols.push({
+      header: "School Name",
+      accessorKey: nameCol as keyof DynamicSchool,
+      className: "font-bold text-slate-900 dark:text-slate-100 uppercase",
+    });
+
+    // Registration number
+    cols.push({
+      header: "Registration Number",
+      accessorKey: regCol as keyof DynamicSchool,
+      className: "font-mono font-bold text-sea",
+    });
+
+    // District
+    cols.push({
+      header: "District",
+      accessorKey: districtCol as keyof DynamicSchool,
+      className: "text-slate-750 dark:text-slate-350",
+    });
+
+    // Region
+    cols.push({
+      header: "Education Region",
+      accessorKey: regionCol as keyof DynamicSchool,
+      className: "text-slate-750 dark:text-slate-350",
+    });
+
+    return cols;
+  }, [nameCol, regCol, districtCol, regionCol]);
+
+  // Handle Add/Edit Form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData[nameCol] || !formData[regCol]) {
+      triggerAlert(
+        "School Name and School Registration Number are required.",
+        "error",
+      );
+      return;
+    }
+
+    const compiled: DynamicSchool = { id: formData[regCol], ...formData };
+
+    const exists = items.some((item) => item.id === compiled.id);
+    if (selectedSchool) {
+      updateItem(compiled);
+      triggerAlert(`Record for ${compiled[nameCol]} updated successfully.`, "success");
+    } else {
+      if (exists) {
+        triggerAlert(
+          `A school profile with Reg Number ${compiled[regCol]} already exists.`,
+          "error",
+        );
+        return;
+      }
+      addItem(compiled);
+      triggerAlert(`New institutional profile for ${compiled[nameCol]} registered.`, "success");
+    }
+
+    setModalOpen(false);
+    setSelectedSchool(null);
+    setFormData({});
+  };
+
+  const handleEditClick = (sc: DynamicSchool) => {
+    setSelectedSchool(sc);
+    setFormData(sc);
+    setModalOpen(true);
+  };
+
+  const handleViewClick = (sc: DynamicSchool) => {
+    setSelectedSchool(sc);
+    setDossierOpen(true);
+  };
+
+  const handleDeleteClick = (sc: DynamicSchool) => {
+    setSelectedSchool(sc);
+    setDeleteOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedSchool) {
+      deleteItem(selectedSchool.id);
+      triggerAlert(`Institutional profile for ${selectedSchool[nameCol]} deleted.`, "success");
+      setDeleteOpen(false);
+      setSelectedSchool(null);
+    }
+  };
+
+  // Stats
+  const total = items.length;
+  
+  const bpcPower = items.filter((i) => {
+    const val = String(i[electricityCol] || "").toLowerCase();
+    return val.includes("grid") || val.includes("bpc");
+  }).length;
+
+  const connectedWifi = items.filter((i) => {
+    const val = String(i[internetCol] || "").toLowerCase();
+    return val !== "none" && val !== "" && val !== "n/a";
+  }).length;
+
+  const boardingSchools = items.filter((i) => {
+    const val = String(i[boardingCol] || "").toLowerCase();
+    return val === "yes";
+  }).length;
+
+  return (
+    <div className="space-y-6 animate-fade-in" id="school-info-registry-section">
       {alert && (
-        <div 
-          id="school-info-alert"
-          className={`p-4.5 rounded-2xl border flex items-start gap-3.5 text-xs font-semibold ${
+        <div
+          id="school-info-toast-alert"
+          className={`p-4 rounded-xl border flex items-center gap-3 text-xs font-semibold ${
             alert.type === "success" 
-              ? "bg-sea/10 border-sea text-sea" 
-              : "bg-golden/10 border-golden text-golden"
+              ? "bg-sea/10 border-sea/30 text-sea" 
+              : "bg-golden/10 border-golden/30 text-golden"
           }`}
         >
-          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-          <div className="space-y-0.5">
-            <span className="font-bold block uppercase tracking-wider">
-              {alert.type === "success" ? "Operation Succeeded" : "Notification"}
-            </span>
-            <span>{alert.message}</span>
-          </div>
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>{alert.message}</span>
         </div>
       )}
 
-      {/* Main Container */}
-      <SectionContainer
-        title="EMIS School Registration Profile"
-        description="Verify and update registered national identifiers, geographic boundaries, multigrade streams, supportive resources, and environmental utilities."
-      >
-        {/* Toggle Mode Switch Toolbar */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <div className="w-2 md:w-3.5 h-6 bg-prussian rounded-full" />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-[#001020] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+          <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-sm font-black text-prussian dark:text-sea uppercase tracking-wide">
-                SCHOOL REGISTRATION NUMBER: {schoolData.regNum || "UNASSIGNED"}
-              </h3>
-              <p className="text-[11px] text-slate-500 font-medium">
-                Current State: <strong className="text-sea">{schoolData.registrationStatus || "Registered"}</strong>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                Total Registries
               </p>
+              <h3 className="text-3xl font-black text-slate-800 dark:text-slate-100">
+                {total}
+              </h3>
             </div>
-          </div>
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            {isEditMode ? (
-              <>
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="inline-flex items-center gap-2 border border-slate-300 dark:border-slate-700 bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium text-sm px-4 py-2 rounded transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-slate-400 active:scale-98 cursor-pointer"
-                >
-                  Discard Changes
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  className="inline-flex items-center gap-2 bg-sea hover:bg-[#008a8a] text-white font-medium text-sm px-4 py-2 rounded shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-sea focus:ring-offset-2 active:scale-98 cursor-pointer"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>Save Profile</span>
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsEditMode(true)}
-                className="inline-flex items-center gap-2 bg-prussian hover:bg-[#001c3d] text-white font-medium text-sm px-4 py-2 rounded shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-prussian focus:ring-offset-2 active:scale-98 cursor-pointer"
-              >
-                <Edit3 className="w-4 h-4" />
-                <span>Modify Registration Profile</span>
-              </button>
-            )}
+            <div className="p-2 bg-sea/10 rounded-lg text-sea">
+              <School className="w-5 h-5" />
+            </div>
           </div>
         </div>
-
-        {/* Dynamic Display Layout */}
-        {!isEditMode ? (
-          /* ==========================================
-             VIEW MODE: Beautiful high-density dashboard
-             ========================================== */
-          <div className="space-y-6 pt-4" id="school-info-view-dashboard">
-            {/* Quick Status Highlight Widgets */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">TYPE OF SCHOOL</span>
-                <span className="text-xs font-bold text-prussian dark:text-sea block">{schoolData.schoolType || "Government"}</span>
-                <span className="text-[10px] text-slate-500 block">Official Category</span>
-              </div>
-              <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">DISTRICT</span>
-                <span className="text-xs font-bold text-prussian dark:text-sea block truncate">{schoolData.district || "Kgalagadi"}</span>
-                <span className="text-[10px] text-slate-500 block">{schoolData.village || "Hukuntsi"}</span>
-              </div>
-              <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">TOTAL NUMBER OF STREAMS</span>
-                <span className="text-xs font-bold text-prussian dark:text-sea block">
-                  {schoolData.totalStreams || 0} Registered
-                </span>
-                <span className="text-[10px] text-slate-500 block flex items-center gap-1">
-                  <span className="text-slate-400">STREAM CHECK:</span>
-                  {schoolData.streamCheck === "Verified" ? (
-                    <>
-                      <CheckCircle className="w-3 h-3 text-sea" />
-                      <span className="text-sea">Verified</span>
-                    </>
-                  ) : (
-                    <>
-                      <AlertTriangle className="w-3 h-3 text-golden" />
-                      <span className="text-golden">Review Needed</span>
-                    </>
-                  )}
-                </span>
-              </div>
-              <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">SCHOOL HAS TRANSPORT FOR DISABLED</span>
-                <span className="text-xs font-bold text-prussian dark:text-sea block">
-                  SPED Unit: {schoolData.hasSpedUnit || "No"}
-                </span>
-                <span className="text-[10px] text-slate-500 block">Transport: {schoolData.hasTransportDisabled || "No"}</span>
-              </div>
+        <div className="bg-white dark:bg-[#001020] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                Grid Power (BPC)
+              </p>
+              <h3 className="text-3xl font-black text-amber-600 dark:text-amber-400">
+                {bpcPower}
+              </h3>
             </div>
-
-            {/* Detailed Metadata Sections */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              {/* Card A: Institutional Identity & Coordinates */}
-              <div className="p-5.5 bg-white dark:bg-ink rounded-2xl border border-slate-150 dark:border-slate-800 space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-prussian dark:text-sea flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
-                  <Compass className="w-4 h-4 text-prussian dark:text-sea" />
-                  <span>Administrative Coordinates & Location</span>
-                </h4>
-                <div className="grid grid-cols-2 gap-y-3.5 gap-x-2 text-xs">
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">SCHOOL NAME</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{schoolData.name || "N/A"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">SCHOOL REGISTRATION NUMBER</span>
-                    <span className="font-mono font-bold text-slate-850 dark:text-slate-200">{schoolData.regNum || "N/A"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">DISTRICT</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{schoolData.district || "N/A"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">EDUCATION REGION</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{schoolData.region || "N/A"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">SUB-REGION</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{schoolData.subRegion || "N/A"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">VILLAGE/ CITY/ TOWN</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{schoolData.village || "N/A"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">EXTENSION/ WARD</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{schoolData.extensionWard || "N/A"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">Email</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">{schoolData.email || "N/A"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">TELEPHONE</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 block">{schoolData.tel || "N/A"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">FAX</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 block">{schoolData.fax || "N/A"}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card B: Environmental Utilities & Access */}
-              <div className="p-5.5 bg-white dark:bg-ink rounded-2xl border border-slate-150 dark:border-slate-800 space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-prussian dark:text-sea flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
-                  <Bolt className="w-4 h-4 text-amber-500 animate-pulse" />
-                  <span>Utilities, Power & Digital Infrastructure</span>
-                </h4>
-                <div className="grid grid-cols-2 gap-y-3.5 gap-x-2 text-xs">
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">MAIN SOURCE_Electricity</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
-                      {schoolData.electricitySource || "None"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">MAIN SOURCE_Water</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                      <Droplets className="w-3.5 h-3.5 text-blue-500" />
-                      {schoolData.waterSource || "None"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">INTERNET INFRASTRUCTURE</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                      <Network className="w-3.5 h-3.5 text-cyan-500" />
-                      {schoolData.internetType || "None"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">Internet Bandwidth Speed</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 font-mono">
-                      {schoolData.internetSpeed ? `${schoolData.internetSpeed} Mbps` : "N/A"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">Facility Router Coverage</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{schoolData.internetCoverage || "None"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">SECURITY IN PLACE</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                      <ShieldCheck className="w-3.5 h-3.5 text-sea" />
-                      {schoolData.securityInPlace || "NONE"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card C: Stream Demographics Breakdown */}
-              <div className="p-5.5 bg-white dark:bg-ink rounded-2xl border border-slate-150 dark:border-slate-800 space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-prussian dark:text-sea flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
-                  <Layers className="w-4 h-4 text-prussian dark:text-sea" />
-                  <span>Streams Registries (Std 1 - 7)</span>
-                </h4>
-                
-                <div className="grid grid-cols-7 gap-2 text-center">
-                  {[1, 2, 3, 4, 5, 6, 7].map((num) => {
-                    const stdKey = `streamsStd${num}` as keyof SchoolInfo;
-                    const val = schoolData[stdKey];
-                    return (
-                      <div key={num} className="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                        <span className="block text-[9px] font-bold text-slate-400 uppercase">Std {num}</span>
-                        <span className="block text-[8px] text-slate-400 lowercase">streams</span>
-                        <span className="text-sm font-black text-prussian dark:text-slate-200">{Number(val || 0)}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="p-3 bg-sea/5 dark:bg-slate-905/30 border border-sea/20 rounded-xl space-y-1 text-xs">
-                  <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
-                    <span className="font-semibold text-[11px]">TOTAL NUMBER OF STREAMS:</span>
-                    <span className="font-black text-sm text-prussian dark:text-sea">{schoolData.totalStreams || 0} Rooms</span>
-                  </div>
-                  <div className="flex justify-between items-center text-slate-400 text-[10px]">
-                    <span>STREAM CHECK:</span>
-                    <span className="font-bold">{schoolData.streamCheck || "Verified"}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card D: Operational Formats */}
-              <div className="p-5.5 bg-white dark:bg-ink rounded-2xl border border-slate-150 dark:border-slate-800 space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-prussian dark:text-sea flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
-                  <Activity className="w-4 h-4 text-prussian dark:text-sea" />
-                  <span>Shift Formats, Boarding & Multigrades</span>
-                </h4>
-                <div className="grid grid-cols-2 gap-y-3.5 gap-x-2 text-xs">
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">Shifting Classes Active?</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{schoolData.shifting || "No"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">BOARDING</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{schoolData.boarding || "No"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">MULTIGRADE CLASSES</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{schoolData.multigradeClasses || "No"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">LIST OF MULTIGRADED CLASSES</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{schoolData.multigradeClassList || "None"}</span>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-slate-400 block font-semibold text-[10.5px]">ENROLMENT IN EACH MULTIGRADED CLASS</span>
-                    <span className="font-bold text-slate-850 dark:text-slate-200 block">{schoolData.multigradeEnrolment || "None"}</span>
-                  </div>
-                </div>
-              </div>
-
+            <div className="p-2 bg-amber-50 dark:bg-amber-900/40 rounded-lg text-amber-600 dark:text-amber-400">
+              <Zap className="w-5 h-5" />
             </div>
           </div>
-        ) : (
-          /* ==========================================
-             EDIT MODE: Categorized interactive forms
-             ========================================== */
-          <form onSubmit={handleSave} className="space-y-6 pt-4" id="school-info-form">
-            
-            {/* Category 1: General Info */}
-            <div className="bg-slate-50 dark:bg-slate-900/40 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
-              <h4 className="text-xs font-extrabold uppercase tracking-widest text-prussian dark:text-sea flex items-center gap-2">
-                <School className="w-4 h-4 text-sea" />
-                <span>1. Core Institutional Identity</span>
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    SCHOOL NAME *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name || ""}
-                    onChange={(e) => handleFieldChange("name", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-800 dark:text-slate-200 focus:ring-1 focus:ring-prussian"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    SCHOOL REGISTRATION NUMBER *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.regNum || ""}
-                    onChange={(e) => handleFieldChange("regNum", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden font-mono text-slate-800 dark:text-slate-200"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    TYPE OF SCHOOL
-                  </label>
-                  <select
-                    value={formData.schoolType}
-                    onChange={(e) => handleFieldChange("schoolType", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="Government">Government</option>
-                    <option value="Private">Private</option>
-                    <option value="Government Aided">Government Aided</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    Status of Registration
-                  </label>
-                  <select
-                    value={formData.registrationStatus}
-                    onChange={(e) => handleFieldChange("registrationStatus", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="Registered">Registered fully</option>
-                    <option value="Pending">Pending review</option>
-                    <option value="Closed">Closed</option>
-                    <option value="Provisionally Registered">Provisionally Registered</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Category 2: Geographic bounds & Contact details */}
-            <div className="bg-slate-50 dark:bg-slate-900/40 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
-              <h4 className="text-xs font-extrabold uppercase tracking-widest text-prussian dark:text-sea flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-sea" />
-                <span>2. Locality Boundaries & Unified Contacts</span>
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">DISTRICT</label>
-                  <input
-                    type="text"
-                    value={formData.district || ""}
-                    onChange={(e) => handleFieldChange("district", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">EDUCATION REGION</label>
-                  <input
-                    type="text"
-                    value={formData.region || ""}
-                    onChange={(e) => handleFieldChange("region", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">SUB-REGION</label>
-                  <select
-                    value={formData.subRegion || ""}
-                    onChange={(e) => handleFieldChange("subRegion", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="">-- Choose Sub-Region --</option>
-                    {BOTSWANA_SUB_REGIONS.map((region) => (
-                      <option key={region} value={region}>
-                        {region}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">VILLAGE/ CITY/ TOWN</label>
-                  <input
-                    type="text"
-                    value={formData.village || ""}
-                    onChange={(e) => handleFieldChange("village", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">EXTENSION/ WARD</label>
-                  <input
-                    type="text"
-                    value={formData.extensionWard || ""}
-                    onChange={(e) => handleFieldChange("extensionWard", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={formData.email || ""}
-                    onChange={(e) => handleFieldChange("email", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">TELEPHONE *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.tel || ""}
-                    onChange={(e) => handleFieldChange("tel", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">FAX</label>
-                  <input
-                    type="text"
-                    value={formData.fax || ""}
-                    onChange={(e) => handleFieldChange("fax", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Category 3: Streams Breakdown */}
-            <div className="bg-slate-50 dark:bg-slate-900/40 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
-              <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
-                <h4 className="text-xs font-extrabold uppercase tracking-widest text-prussian dark:text-sea flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-sea" />
-                  <span>3. Classroom Streams Registries (Std 1 - 7)</span>
-                </h4>
-                <div className="text-[10px] bg-sea/15 text-sea px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
-                  Aggregating: {currentTotalStreams} Active Streams
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-                {[1, 2, 3, 4, 5, 6, 7].map((num) => {
-                  const key = `streamsStd${num}` as keyof SchoolInfo;
-                  return (
-                    <div key={num} className="p-3 bg-white dark:bg-ink rounded-2xl border border-slate-250 dark:border-slate-850 space-y-1 text-center">
-                      <label className="block text-[8.5px] font-black text-slate-500 uppercase tracking-wide">Std {num} Room</label>
-                      <label className="block text-[7.5px] font-black text-slate-400 uppercase tracking-wide">NUMBER OF STREAMS</label>
-                      <input
-                        type="number"
-                        min="0"
-                        required
-                        value={formData[key] ?? 0}
-                        onChange={(e) => handleFieldChange(key, parseInt(e.target.value) || 0)}
-                        className="w-full text-center text-xs p-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded"
-                      />
-                    </div>
-                  );
-                })}
-
-                <div className="p-3 bg-white dark:bg-ink rounded-2xl border border-slate-250 dark:border-slate-850 space-y-1 text-center col-span-2 lg:col-span-1">
-                  <label className="block text-[9.5px] font-black text-golden uppercase tracking-wide">TOTAL NUMBER OF STREAMS</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.totalStreams ?? 0}
-                    onChange={(e) => handleFieldChange("totalStreams", parseInt(e.target.value) || 0)}
-                    className="w-full text-center text-xs p-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded font-bold"
-                  />
-                </div>
-              </div>
-              <p className="text-[10px] text-slate-400 italic">
-                * Note: If standard classrooms count sum does not match the reported total sum of streams, stream validation state changes automatically to &quot;Review Needed&quot; upon saving. Refer to national policy thresholds.
+        </div>
+        <div className="bg-white dark:bg-[#001020] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                Active Internet
               </p>
+              <h3 className="text-3xl font-black text-cyan-600 dark:text-cyan-400">
+                {connectedWifi}
+              </h3>
             </div>
-
-            {/* Category 4: Operations & Inclusive Education */}
-            <div className="bg-slate-50 dark:bg-slate-900/40 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
-              <h4 className="text-xs font-extrabold uppercase tracking-widest text-prussian dark:text-sea flex items-center gap-2">
-                <Activity className="w-4 h-4 text-sea" />
-                <span>4. Operational Layouts & Inclusive Accommodations</span>
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4.5">
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    SHIFTING
-                  </label>
-                  <select
-                    value={formData.shifting}
-                    onChange={(e) => handleFieldChange("shifting", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    BOARDING *
-                  </label>
-                  <select
-                    value={formData.boarding}
-                    onChange={(e) => handleFieldChange("boarding", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    MULTIGRADE CLASSES *
-                  </label>
-                  <select
-                    value={formData.multigradeClasses}
-                    onChange={(e) => handleFieldChange("multigradeClasses", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    LIST OF MULTIGRADED CLASSES
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.multigradeClassList || ""}
-                    onChange={(e) => handleFieldChange("multigradeClassList", e.target.value)}
-                    placeholder="e.g. Standard 3 & 4 Social studies"
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    ENROLMENT IN EACH MULTIGRADED CLASS
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.multigradeEnrolment || ""}
-                    onChange={(e) => handleFieldChange("multigradeEnrolment", e.target.value)}
-                    placeholder="e.g. 15 Pupils total composite"
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    SCHOOL HAS SPED UNIT
-                  </label>
-                  <select
-                    value={formData.hasSpedUnit}
-                    onChange={(e) => handleFieldChange("hasSpedUnit", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    SCHOOL HAS TRANSPORT FOR DISABLED
-                  </label>
-                  <select
-                    value={formData.hasTransportDisabled}
-                    onChange={(e) => handleFieldChange("hasTransportDisabled", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    SECURITY IN PLACE
-                  </label>
-                  <select
-                    value={formData.securityInPlace}
-                    onChange={(e) => handleFieldChange("securityInPlace", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="Internal">Internal</option>
-                    <option value="Outsourced">Outsourced</option>
-                    <option value="Internal and Outsourced">Internal and Outsourced</option>
-                    <option value="NONE">NONE</option>
-                  </select>
-                </div>
-              </div>
+            <div className="p-2 bg-cyan-50 dark:bg-cyan-900/40 rounded-lg text-cyan-600 dark:text-cyan-400">
+              <Network className="w-5 h-5" />
             </div>
-
-            {/* Category 5: Environmental power & connective links */}
-            <div className="bg-slate-50 dark:bg-slate-900/40 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
-              <h4 className="text-xs font-extrabold uppercase tracking-widest text-prussian dark:text-sea flex items-center gap-2">
-                <Bolt className="w-4 h-4 text-amber-500" />
-                <span>5. Environmental Grids & Digital Coverage</span>
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4.5">
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    MAIN SOURCE - Electricity
-                  </label>
-                  <select
-                    value={formData.electricitySource}
-                    onChange={(e) => handleFieldChange("electricitySource", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="Solar Power">Solar Power</option>
-                    <option value="Grid Power (BPC)">Grid Power (BPC)</option>
-                    <option value="Generator">Generator</option>
-                    <option value="None">None</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-550 mb-1">
-                    MAIN SOURCE - Water
-                  </label>
-                  <select
-                    value={formData.waterSource}
-                    onChange={(e) => handleFieldChange("waterSource", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="Stand Pipe (WUC)">Stand Pipe (WUC)</option>
-                    <option value="Borehole">Borehole</option>
-                    <option value="Water Tanker">Water Tanker</option>
-                    <option value="None">None</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-550 mb-1">
-                    INTERNET INFRASTRUCTURE
-                  </label>
-                  <select
-                    value={formData.internetType}
-                    onChange={(e) => handleFieldChange("internetType", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="LAN + Wi-Fi">LAN + Wi-Fi</option>
-                    <option value="Wi-Fi">Wi-Fi</option>
-                    <option value="LAN">LAN</option>
-                    <option value="None">None</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    Bandwidth speed capacity (Mbps)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.internetSpeed || ""}
-                    onChange={(e) => handleFieldChange("internetSpeed", e.target.value)}
-                    placeholder="e.g. 10 or 100"
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10.5px] uppercase tracking-wider font-bold text-slate-500 mb-1">
-                    COVERAGE
-                  </label>
-                  <select
-                    value={formData.internetCoverage}
-                    onChange={(e) => handleFieldChange("internetCoverage", e.target.value)}
-                    className="w-full text-xs p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-hidden text-slate-850 dark:text-slate-200"
-                  >
-                    <option value="Full">Full</option>
-                    <option value="Partial">Partial</option>
-                    <option value="None">None</option>
-                  </select>
-                </div>
-              </div>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-[#001020] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                Boarding Units
+              </p>
+              <h3 className="text-3xl font-black text-emerald-600 dark:text-emerald-400">
+                {boardingSchools}
+              </h3>
             </div>
-
-            {/* Sticky Actions Group */}
-            <div className="flex justify-end gap-3.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-              <button
-                type="button"
-                onClick={handleReset}
-                className="px-5 py-3 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
-              >
-                Discard Parameters
-              </button>
-              <button
-                type="submit"
-                id="btn-save-school-info"
-                className="flex items-center gap-1.5 px-6 py-3 rounded-xl text-white font-bold text-xs bg-sea hover:bg-sea/85 transition-colors shadow-sm cursor-pointer"
-              >
-                <Save className="w-4 h-4" />
-                <span>Save Registry Parameters</span>
-              </button>
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/40 rounded-lg text-emerald-600 dark:text-emerald-400">
+              <Globe className="w-5 h-5" />
             </div>
+          </div>
+        </div>
+      </div>
 
-          </form>
-        )}
+      <SectionContainer
+        title={config.form_title}
+        description="National statutory institutional profile registry powered by unified architecture."
+        action={
+          <div className="flex items-center gap-3">
+            <AddButton
+              label="Add New School"
+              onClick={() => {
+                setSelectedSchool(null);
+                const initData: any = {};
+                config.fields.forEach((f) => {
+                  if (f.default) initData[f.column] = f.default;
+                  else if (
+                    f.input_type === "select" &&
+                    f.options &&
+                    f.options.length > 0
+                  )
+                    initData[f.column] = f.options[0];
+                });
+                setFormData(initData);
+                setModalOpen(true);
+              }}
+            />
+          </div>
+        }
+      >
+        <FilterBar
+          searchPlaceholder="Search School ID or Name..."
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filters={filterConfigs}
+          onClear={clearFilters}
+        />
+        <DataTable
+          columns={columns}
+          data={filteredItems}
+          onView={handleViewClick}
+          onEdit={handleEditClick}
+          onDelete={handleDeleteClick}
+          emptyMessage="No institutional profiles match active filter scopes."
+        />
       </SectionContainer>
+
+      {/* Add / Edit Form Modal */}
+      <FormModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={selectedSchool ? `Modify Profile: ${selectedSchool[nameCol]}` : "Register Institutional Profile"}
+        onSubmit={handleSubmit}
+        size="3xl"
+      >
+        <div className="space-y-6">
+          {[
+            "Section 1: Basic Institutional & Administrative Information",
+            "Section 2: Streams, Classrooms & Enrollment Organization",
+            "Section 3: Institutional Services, Infrastructure & Utilities",
+            "Section 4: Contact & Communication Details",
+          ].map((sectionName) => {
+            const secFields = config.fields.filter(
+              (f) => getFieldSection(f.name) === sectionName
+            );
+            if (secFields.length === 0) return null;
+
+            return (
+              <div key={sectionName} className="space-y-4">
+                <h3 className="block text-xs font-black uppercase tracking-wider text-prussian dark:text-sea border-b border-slate-200 dark:border-slate-800 pb-2.5 mt-2">
+                  {sectionName}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {secFields.map((field) => (
+                    <div key={field.column}>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                        {field.name}{" "}
+                        {field.validation?.allow_blank === false ? "*" : ""}
+                      </label>
+                      {field.input_type === "select" ? (
+                        <select
+                          required={field.validation?.allow_blank === false}
+                          value={formData[field.column] || ""}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              [field.column]: e.target.value,
+                            }))
+                          }
+                          className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded focus:ring-1 focus:ring-sea outline-none text-slate-900 dark:text-white"
+                        >
+                          <option value="">-- Select Option --</option>
+                          {field.options?.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type={field.input_type === "number" ? "number" : "text"}
+                          required={field.validation?.allow_blank === false}
+                          disabled={!!selectedSchool && field.column === regCol}
+                          value={formData[field.column] ?? ""}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              [field.column]: field.input_type === "number" ? (e.target.value === "" ? "" : Number(e.target.value)) : e.target.value,
+                            }))
+                          }
+                          className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded focus:ring-1 focus:ring-sea outline-none text-slate-900 dark:text-white"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </FormModal>
+
+      {/* Dossier Modal */}
+      <FormModal
+        isOpen={dossierOpen}
+        onClose={() => setDossierOpen(false)}
+        title={`${selectedSchool ? selectedSchool[nameCol] : "School"} - Profile Dossier`}
+        onSubmit={(e) => {
+          e.preventDefault();
+          setDossierOpen(false);
+        }}
+        submitLabel="Close"
+        cancelLabel="Print Dossier"
+      >
+        {selectedSchool && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-900 p-4 border dark:border-slate-800 rounded">
+              <div className="w-12 h-12 rounded bg-prussian flex items-center justify-center text-white font-black text-xl shadow-md">
+                {String(selectedSchool[nameCol] || "S").charAt(0)}
+              </div>
+              <div>
+                <h4 className="text-base font-bold text-slate-900 dark:text-slate-100 uppercase">
+                  {selectedSchool[nameCol]}
+                </h4>
+                <p className="text-xs font-mono text-sea mt-0.5">
+                  Reg No: {selectedSchool[regCol]}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4.5 text-xs text-slate-700 dark:text-slate-300">
+              {config.fields.map((field) => (
+                <div
+                  key={field.column}
+                  className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded border border-slate-100 dark:border-slate-800"
+                >
+                  <span className="text-[10px] text-slate-400 font-mono block uppercase">
+                    {field.name}:
+                  </span>
+                  <span className="font-bold text-xs">
+                    {selectedSchool[field.column] !== undefined && selectedSchool[field.column] !== null
+                      ? String(selectedSchool[field.column])
+                      : "N/A"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </FormModal>
+
+      {/* Delete Confirmation */}
+      <FormModal
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        title="Confirm Deletion"
+        onSubmit={(e) => {
+          e.preventDefault();
+          confirmDelete();
+        }}
+        submitLabel="Delete"
+        cancelLabel="Cancel"
+      >
+        <div className="text-center py-4">
+          <Trash2 className="w-12 h-12 text-rose-500 mx-auto mb-3" />
+          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+            De-register Institutional Instance?
+          </h4>
+          <p className="text-xs text-slate-500 mt-2">
+            Are you sure you want to permanently delete school profile listing: <strong className="text-slate-850 dark:text-slate-200">{selectedSchool?.[nameCol]}</strong>?
+          </p>
+        </div>
+      </FormModal>
     </div>
   );
 };

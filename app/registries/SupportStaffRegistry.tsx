@@ -571,7 +571,7 @@ export const SupportStaffRegistry: React.FC = () => {
               </select>
             </div>
             <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-5 border-t border-slate-100 dark:border-slate-800/60 pt-4">
-              <span className="md:col-span-3 block text-xs font-bold uppercase tracking-wider text-slate-500 font-mono">In-Service Training (2025)</span>
+              <span className="md:col-span-3 block text-xs font-bold uppercase tracking-wider text-slate-500 font-mono">In-Service Training</span>
               <div>
                 <label className="text-[10px] text-slate-400 uppercase tracking-wide block mb-1">ICT Related</label>
                 <select
@@ -604,9 +604,9 @@ export const SupportStaffRegistry: React.FC = () => {
           </div>
         </div>
 
-        {/* Section 4: Staff Absence (Previous Year 2025) */}
+        {/* Section 4: Staff Absence (Previous Year) */}
         <div className="mb-6">
-          <h3 className="block text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-100 mb-3 border-b border-slate-200 dark:border-slate-800 pb-2">Section 4: Staff Absence (Previous Year 2025)</h3>
+          <h3 className="block text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-100 mb-3 border-b border-slate-200 dark:border-slate-800 pb-2">Section 4: Staff Absence (Previous Year)</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <label className="text-[10px] text-slate-500 uppercase font-bold tracking-wide block mb-1">Normal Leave</label>
@@ -769,7 +769,7 @@ export const SupportStaffRegistry: React.FC = () => {
                 <span className="font-semibold text-sea">{selectedStaff.ict}</span>
               </div>
               <div className="col-span-2">
-                <span className="text-slate-400 font-mono text-[9px] uppercase block">In-Service Training (2025):</span>
+                <span className="text-slate-400 font-mono text-[9px] uppercase block">In-Service Training:</span>
                 <span className="font-semibold text-slate-800 dark:text-slate-200">
                   ICT Related: {selectedStaff.trainingIct || "None"} | Leadership: {selectedStaff.trainingLeadership || "None"} | Profession: {selectedStaff.trainingProfession || "None"}
                 </span>

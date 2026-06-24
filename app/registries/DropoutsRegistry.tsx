@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { AlertCircle } from "lucide-react";
-import { Dropout } from "../types";
+import React, { useState, useMemo } from "react";
+import { AlertCircle, Users, GraduationCap, Calendar, FileText } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useFilters } from "@/hooks/useFilters";
 import { INITIAL_DROPOUTS } from "../constants";
@@ -12,51 +11,115 @@ import { DataTable, ColumnConfig } from "../shared/DataTable";
 import { FormModal } from "../shared/FormModal";
 import { AddButton } from "../shared/ActionButtons";
 
-const REASON_OPTIONS = [
-  "Abused by Parent(s)",
-  "Abused by Teacher(s)",
-  "Bullying",
-  "Child Labor",
-  "Corporal Punishment",
-  "Desertion",
-  "Expulsion",
-  "Fees",
-  "Illness",
-  "Marriage",
-  "Poor Performance",
-  "Pregnancy",
-  "Religion",
-  "Substance Abuse",
-  "Truancy",
-  "Other"
-];
+import primaryConfig from "./configs/dropout_primary.json";
+import juniorConfig from "./configs/dropout_junior_secondary.json";
+import earlyConfig from "./configs/dropout_early_childhood.json";
+import spedConfig from "./configs/dropout_sped.json";
+import unifiedConfig from "./configs/dropout_unified.json";
 
-const DEATH_CAUSE_OPTIONS = [
-  "N/A",
-  "Road Accident",
-  "Fire",
-  "Drowning",
-  "Food poisoning",
-  "Chemical ingestion",
-  "Illness",
-  "Homicide",
-  "Suicide",
-  "Other"
-];
+const JSON_CONFIGS: Record<string, any> = {
+  PRIMARY: primaryConfig,
+  JUNIOR: juniorConfig,
+  EARLY: earlyConfig,
+  SPED: spedConfig,
+  UNIFIED: unifiedConfig,
+};
 
-export const DropoutsRegistry: React.FC = () => {
-  const { items, addItem, updateItem, deleteItem } = useLocalStorage<Dropout>(
-    "dropouts",
-    INITIAL_DROPOUTS
+type ToolLevel = "PRIMARY" | "JUNIOR" | "EARLY" | "SPED" | "UNIFIED";
+
+export interface JsonField {
+  name: string;
+  column: string;
+  input_type: "text" | "select" | "number";
+  options?: string[];
+  validation?: any;
+}
+
+export interface JsonConfig {
+  form_title: string;
+  fields: JsonField[];
+}
+
+export interface DynamicDropout {
+  id: string; // The primary ID mapping (Column A)
+  [key: string]: any;
+}
+
+// Map the old mock data format (with named keys) to the excel column-based schema
+const mappedInitialPrimary = INITIAL_DROPOUTS.map((item: any) => {
+  if (item["B"]) return item; // Already mapped
+  return {
+    id: item.id || item["A"],
+    "A": item.id || item["A"],
+    "B": item.surname || item["B"],
+    "C": item.first || item["C"],
+    "D": item.nat || item["D"],
+    "E": item.sex || item["E"],
+    "F": item.dropoutDay || item["F"],
+    "G": item.dropoutMonth || item["G"],
+    "H": item.dropoutYear || item["H"],
+    "I": item.std || item["I"],
+    "J": item.reason || item["J"],
+    "K": item.deathCause || item["K"],
+    "L": item.specialNeeds || item["L"]
+  };
+});
+
+export const DropoutsRegistry: React.FC<{ toolType?: ToolLevel }> = ({
+  toolType = "PRIMARY",
+}) => {
+  const [activeTool, setActiveTool] = useState<ToolLevel>(toolType);
+  const config = JSON_CONFIGS[activeTool] as JsonConfig;
+  const storageKey = activeTool.toLowerCase() + "_dropouts";
+
+  return (
+    <DynamicDropoutsRegistryWrapper
+      key={activeTool}
+      activeTool={activeTool}
+      config={config}
+      storageKey={storageKey}
+      onChangeTool={setActiveTool}
+    />
+  );
+};
+
+const DynamicDropoutsRegistryWrapper: React.FC<{
+  activeTool: ToolLevel;
+  config: JsonConfig;
+  storageKey: string;
+  onChangeTool: (tool: ToolLevel) => void;
+}> = ({ activeTool, config, storageKey, onChangeTool }) => {
+  const { items, addItem, updateItem, deleteItem } = useLocalStorage<DynamicDropout>(
+    storageKey,
+    activeTool === "PRIMARY" ? mappedInitialPrimary : []
   );
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [dossierOpen, setDossierOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedDropout, setSelectedDropout] = useState<Dropout | null>(null);
+  const [selectedDropout, setSelectedDropout] = useState<DynamicDropout | null>(null);
   const [alert, setAlert] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [formData, setFormData] = useState<Partial<DynamicDropout>>({});
 
-  const [formData, setFormData] = useState<Partial<Dropout>>({});
+  const triggerAlert = (message: string, type: "success" | "error") => {
+    setAlert({ message, type });
+    setTimeout(() => setAlert(null), 4000);
+  };
 
+  // Identify index properties
+  const idCol = config.fields.find(f => f.name.toUpperCase().includes("NATIONAL ID") || f.column === "A")?.column || "A";
+  const surnameCol = config.fields.find(f => f.name.toUpperCase().includes("SURNAME") || f.column === "B")?.column || "B";
+  const namesCol = config.fields.find(f => f.name.toUpperCase().includes("NAMES") || f.column === "C")?.column || "C";
+  const sexCol = config.fields.find(f => f.name.toUpperCase().includes("SEX") || f.name.toUpperCase().includes("GENDER") || f.column === "E")?.column || "E";
+  
+  const levelCol = config.fields.find(f => 
+    ["STANDARD", "FORM", "LEVEL", "CATEGORY/ LEVEL"].some(keyword => f.name.toUpperCase().includes(keyword)) || f.column === "I" || f.column === "L"
+  )?.column || "I";
+
+  const levelOptions = config.fields.find(f => f.column === levelCol)?.options || [];
+  const sexOptions = config.fields.find(f => f.column === sexCol)?.options || ["Male", "Female", "Other"];
+
+  // Filters hook setup
   const {
     searchQuery,
     setSearchQuery,
@@ -64,101 +127,124 @@ export const DropoutsRegistry: React.FC = () => {
     setFilterVal,
     clearFilters,
     filteredItems
-  } = useFilters<Dropout>(
-    items,
-    ["id", "surname", "first", "reason"],
-    { reason: "All", std: "All" }
-  );
-
-  const triggerAlert = (message: string, type: "success" | "error") => {
-    setAlert({ message, type });
-    setTimeout(() => setAlert(null), 4000);
-  };
+  } = useFilters<DynamicDropout>(items, [idCol, surnameCol, namesCol], {
+    [levelCol]: "All",
+    [sexCol]: "All"
+  });
 
   const filterConfigs = [
     {
-      key: "reason",
-      label: "Reason",
-      value: activeFilters.reason || "All",
-      options: REASON_OPTIONS,
-      onChange: (val: string) => setFilterVal("reason", val)
+      key: levelCol,
+      label: config.fields.find(f => f.column === levelCol)?.name || "Level",
+      value: activeFilters[levelCol] || "All",
+      options: levelOptions,
+      onChange: (val: string) => setFilterVal(levelCol, val)
     },
     {
-      key: "std",
-      label: "Standard",
-      value: activeFilters.std || "All",
-      options: ["Std 1", "Std 2", "Std 3", "Std 4", "Std 5", "Std 6", "Std 7"],
-      onChange: (val: string) => setFilterVal("std", val)
+      key: sexCol,
+      label: "Gender",
+      value: activeFilters[sexCol] || "All",
+      options: sexOptions,
+      onChange: (val: string) => setFilterVal(sexCol, val)
     }
   ];
 
-  const columns: ColumnConfig<Dropout>[] = [
-    { header: "National ID", accessorKey: "id", className: "font-mono font-bold text-sea" },
-    {
+  // Table Columns config dynamically loaded
+  const columns: ColumnConfig<DynamicDropout>[] = useMemo(() => {
+    const cols: ColumnConfig<DynamicDropout>[] = [];
+
+    // 1. Primary ID Col
+    cols.push({
+      header: "National ID",
+      accessorKey: idCol as any,
+      className: "font-mono font-bold text-sea"
+    });
+
+    // 2. Name representation
+    cols.push({
       header: "Full Name",
-      render: (d) => (
+      render: (r) => (
         <div>
-          <span className="font-bold text-slate-900 dark:text-slate-100 truncate uppercase block">{d.surname}</span>
-          <span className="text-slate-500 dark:text-slate-400 text-xs block">{d.first}</span>
+          <span className="font-bold text-slate-900 dark:text-slate-100 truncate uppercase block">
+            {r[surnameCol]}
+          </span>
+          <span className="text-slate-500 dark:text-slate-400 text-xs block truncate max-w-[200px]">
+            {r[namesCol]}
+          </span>
         </div>
       )
-    },
-    { header: "Gender", accessorKey: "sex", className: "font-semibold" },
-    { header: "Standard Grade", accessorKey: "std" },
-    {
-      header: "Primary Reason",
-      render: (d) => (
-        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-golden/10 text-golden uppercase">
-          {d.reason}
-        </span>
-      )
-    },
-    { header: "Date Dropout", accessorKey: "date", className: "font-mono" },
-    { header: "Special Needs (SPED)", accessorKey: "specialNeeds", className: "font-medium" }
-  ];
+    });
 
+    // 3. Other fields mapping except name components
+    config.fields.forEach(f => {
+      if ([idCol, surnameCol, namesCol].includes(f.column)) return;
+      
+      // Skip dates elements since we are displaying compiled dates or skipping day/month breakdown
+      if (f.name.toUpperCase().includes("DATE") && (f.name.toUpperCase().includes("MONTH") || f.name.toUpperCase().includes("YEAR"))) {
+        return;
+      }
+
+      cols.push({
+        header: f.name.toUpperCase().includes("DAY") ? f.name.replace(/[-(\s]*DAY[-)\s]*/gi, " Date") : f.name,
+        render: (r) => {
+          // If it is a DAY column, let's locate month and year columns and render compiled date
+          if (f.name.toUpperCase().includes("DAY")) {
+            const prefix = f.name.toUpperCase().split("DAY")[0];
+            const monthField = config.fields.find(
+              m => m.name.toUpperCase().startsWith(prefix) && m.name.toUpperCase().includes("MONTH")
+            );
+            const yearField = config.fields.find(
+              y => y.name.toUpperCase().startsWith(prefix) && y.name.toUpperCase().includes("YEAR")
+            );
+            
+            if (monthField && yearField) {
+              const d = r[f.column];
+              const m = r[monthField.column];
+              const y = r[yearField.column];
+              if (d && m && y) {
+                return <span className="font-mono text-sm">{`${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`}</span>;
+              }
+            }
+          }
+
+          return (
+            <span className={f.column === levelCol ? "font-bold text-slate-800 dark:text-slate-200" : "text-sm text-slate-600 dark:text-slate-300"}>
+              {r[f.column] || "—"}
+            </span>
+          );
+        }
+      });
+    });
+
+    return cols;
+  }, [config, idCol, surnameCol, namesCol, levelCol]);
+
+  // Form Submit handler
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.id || !formData.surname || !formData.first) {
-      triggerAlert("National ID / Passport, Surname and First Names are essential.", "error");
+    if (!formData[idCol] || !formData[surnameCol] || !formData[namesCol]) {
+      triggerAlert("National ID, Surname, and Student Full Names are required.", "error");
       return;
     }
 
-    // Split date to Y/M/D elements for analytical reports
-    let dDay: number | "" = "";
-    let dMonth: number | "" = "";
-    let dYear: number | "" = "";
-    if (formData.date) {
-      const parts = formData.date.split("-");
-      if (parts.length === 3) {
-        dYear = parseInt(parts[0], 10) || "";
-        dMonth = parseInt(parts[1], 10) || "";
-        dDay = parseInt(parts[2], 10) || "";
-      }
-    }
-
-    const compiled: Dropout = {
-      id: formData.id,
-      surname: String(formData.surname).toUpperCase(),
-      first: formData.first || "",
-      nat: formData.nat || "Botswana",
-      sex: (formData.sex as any) || "Male",
-      dropoutDay: dDay || 10,
-      dropoutMonth: dMonth || 4,
-      dropoutYear: dYear || 2024,
-      date: formData.date || "2024-04-10",
-      std: formData.std || "Std 1",
-      reason: formData.reason || "Desertion",
-      deathCause: formData.deathCause || "N/A",
-      specialNeeds: (formData.specialNeeds as any) || "No"
+    const compiled: DynamicDropout = {
+      id: formData[idCol],
+      ...formData,
+      [surnameCol]: String(formData[surnameCol]).toUpperCase()
     };
+
+    const exists = items.some(item => item.id === compiled.id);
 
     if (selectedDropout) {
       updateItem(compiled);
-      triggerAlert(`Dropout profile for ${compiled.id} updated.`, "success");
+      triggerAlert("Dropout profile updated successfully.", "success");
     } else {
+      if (exists) {
+        triggerAlert(`A dropout record with ID ${compiled.id} already exists.`, "error");
+        return;
+      }
       addItem(compiled);
-      triggerAlert(`Registered dropout file for student ${compiled.surname}.`, "success");
+      triggerAlert(`Added new dropout ${compiled[surnameCol]}.`, "success");
     }
 
     setModalOpen(false);
@@ -166,25 +252,36 @@ export const DropoutsRegistry: React.FC = () => {
     setFormData({});
   };
 
-  const handleEditClick = (d: Dropout) => {
-    setSelectedDropout(d);
-    setFormData(d);
+  const handleEditClick = (r: DynamicDropout) => {
+    setSelectedDropout(r);
+    setFormData(r);
     setModalOpen(true);
   };
 
-  const handleDeleteClick = (d: Dropout) => {
-    setSelectedDropout(d);
+  const handleViewClick = (r: DynamicDropout) => {
+    setSelectedDropout(r);
+    setDossierOpen(true);
+  };
+
+  const handleDeleteClick = (r: DynamicDropout) => {
+    setSelectedDropout(r);
     setDeleteOpen(true);
   };
 
   const confirmDelete = () => {
     if (selectedDropout) {
       deleteItem(selectedDropout.id);
-      triggerAlert(`Successfully removed ${selectedDropout.id} from dropout files.`, "success");
+      triggerAlert(`Successfully removed dropout record for ${selectedDropout[surnameCol]}.`, "success");
       setDeleteOpen(false);
       setSelectedDropout(null);
     }
   };
+
+  // Stats Counters
+  const total = items.length;
+  const boys = items.filter(i => String(i[sexCol]).toUpperCase() === "MALE").length;
+  const girls = items.filter(i => String(i[sexCol]).toUpperCase() === "FEMALE").length;
+  const categoriesCount = new Set(items.map(i => i[levelCol]).filter(Boolean)).size;
 
   return (
     <div className="space-y-6">
@@ -197,29 +294,85 @@ export const DropoutsRegistry: React.FC = () => {
         </div>
       )}
 
+      {/* Stats Cards Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-[#001020] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Dropouts</p>
+              <h3 className="text-3xl font-black text-slate-800 dark:text-slate-100">{total}</h3>
+            </div>
+            <div className="p-2 bg-sea/10 rounded-lg text-sea">
+              <Users className="w-5 h-5" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-[#001020] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Boys Dropped out</p>
+              <h3 className="text-3xl font-black text-blue-600 dark:text-blue-400">{boys}</h3>
+            </div>
+            <div className="p-2 bg-blue-50 dark:bg-blue-900/40 rounded-lg text-blue-600 dark:text-blue-400">
+              <span className="font-bold text-sm">M</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-[#001020] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Girls Dropped out</p>
+              <h3 className="text-3xl font-black text-rose-600 dark:text-rose-400">{girls}</h3>
+            </div>
+            <div className="p-2 bg-rose-50 dark:bg-rose-900/40 rounded-lg text-rose-600 dark:text-rose-450">
+              <span className="font-bold text-sm">F</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-[#001020] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Class Placements</p>
+              <h3 className="text-3xl font-black text-slate-800 dark:text-slate-100">{categoriesCount} / {levelOptions.length || 7}</h3>
+            </div>
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/40 rounded-lg text-emerald-600 dark:text-emerald-400">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <SectionContainer
-        title="Student Dropouts Tracker"
-        description="Comprehensive monitoring of student desertions, medical withdrawals, pregnancy exclusions, or structural dropouts for audit."
+        title={config.form_title}
+        description="Comprehensive dashboard tracking student dropouts and desertions for analytics and reintegration follow-up."
         action={
-          <AddButton
-            label="Record Student Dropout"
-            onClick={() => {
-              setSelectedDropout(null);
-              setFormData({ 
-                id: "", 
-                surname: "", 
-                first: "", 
-                nat: "Botswana", 
-                sex: "Male", 
-                reason: "Desertion", 
-                std: "Std 1", 
-                date: "2024-04-16", 
-                specialNeeds: "No", 
-                deathCause: "N/A" 
-              });
-              setModalOpen(true);
-            }}
-          />
+          <div className="flex items-center gap-3">
+            <AddButton
+              label="Log Dropout"
+              onClick={() => {
+                setSelectedDropout(null);
+                const initData: any = {};
+                config.fields.forEach(f => {
+                  if (f.options && f.options.length > 0) {
+                    initData[f.column] = f.options[0];
+                  } else {
+                    initData[f.column] = "";
+                  }
+                });
+                // Seed some defaults for date fields where standard numeric options apply
+                config.fields.forEach(f => {
+                  if (f.name.toUpperCase().includes("YEAR") && !initData[f.column]) initData[f.column] = 2025;
+                  if (f.name.toUpperCase().includes("MONTH") && !initData[f.column]) initData[f.column] = 1;
+                  if (f.name.toUpperCase().includes("DAY") && !initData[f.column]) initData[f.column] = 15;
+                });
+                setFormData(initData);
+                setModalOpen(true);
+              }}
+            />
+          </div>
         }
       >
         <FilterBar
@@ -232,157 +385,233 @@ export const DropoutsRegistry: React.FC = () => {
         <DataTable
           columns={columns}
           data={filteredItems}
+          onView={handleViewClick}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
-          emptyMessage="No desertion or dropout listings matching active filters."
+          emptyMessage="No dropout records matched active filters."
         />
       </SectionContainer>
 
-      {/* Form Modal */}
+      {/* Form modal */}
       <FormModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={selectedDropout ? "Edit Dropout Incident Record" : "Log Student Dropout Incident"}
+        title={selectedDropout ? `Edit Dropout: ${selectedDropout[surnameCol]}` : `Log New Dropout Incident`}
         onSubmit={handleSubmit}
+        size="2xl"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Student National ID *</label>
-            <input
-              type="text"
-              required
-              disabled={!!selectedDropout}
-              value={formData.id || ""}
-              onChange={(e) => setFormData(prev => ({ ...prev, id: e.target.value }))}
-              placeholder="e.g. 110719001"
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-            />
-          </div>
+          {config.fields.map(field => {
+            // Group Day, Month, Year fields
+            const isDayField = field.name.toUpperCase().includes("DAY");
+            if (isDayField) {
+              const prefix = field.name.toUpperCase().split("DAY")[0];
+              const monthField = config.fields.find(
+                f => f.name.toUpperCase().startsWith(prefix) && f.name.toUpperCase().includes("MONTH")
+              );
+              const yearField = config.fields.find(
+                f => f.name.toUpperCase().startsWith(prefix) && f.name.toUpperCase().includes("YEAR")
+              );
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Primary Withdrawal Reason</label>
-            <select
-              value={formData.reason || "Desertion"}
-              onChange={(e) => setFormData(prev => ({ ...prev, reason: e.target.value }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-            >
-              {REASON_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
-          </div>
+              if (monthField && yearField) {
+                return (
+                  <div key={`${field.column}-group`} className="col-span-1 md:col-span-2 bg-slate-50/50 dark:bg-slate-900/30 p-4 border border-slate-100 dark:border-slate-800/80 rounded-lg">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+                      {prefix.replace(/[-(\s]+$/, "") || "Date"} *
+                    </label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[10px] uppercase font-semibold text-slate-400 mb-0.5">Day</label>
+                        <select
+                          required
+                          value={formData[field.column] || ""}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              [field.column]: Number(e.target.value) || e.target.value,
+                            }))
+                          }
+                          className="w-full text-sm p-2.5 bg-white dark:bg-[#00050c] border border-slate-200 dark:border-slate-800 rounded focus:ring-1 focus:ring-sea outline-hidden text-slate-800 dark:text-slate-100"
+                        >
+                          <option value="">DD</option>
+                          {Array.from({ length: 31 }, (_, i) => String(i + 1)).map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Surname *</label>
-            <input
-              type="text"
-              required
-              value={formData.surname || ""}
-              onChange={(e) => setFormData(prev => ({ ...prev, surname: e.target.value }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded uppercase text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-            />
-          </div>
+                      <div>
+                        <label className="block text-[10px] uppercase font-semibold text-slate-400 mb-0.5">Month</label>
+                        <select
+                          required
+                          value={formData[monthField.column] || ""}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              [monthField.column]: Number(e.target.value) || e.target.value,
+                            }))
+                          }
+                          className="w-full text-sm p-2.5 bg-white dark:bg-[#00050c] border border-slate-200 dark:border-slate-800 rounded focus:ring-1 focus:ring-sea outline-hidden text-slate-800 dark:text-slate-100"
+                        >
+                          <option value="">MM</option>
+                          {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Firstnames *</label>
-            <input
-              type="text"
-              required
-              value={formData.first || ""}
-              onChange={(e) => setFormData(prev => ({ ...prev, first: e.target.value }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-            />
-          </div>
+                      <div>
+                        <label className="block text-[10px] uppercase font-semibold text-slate-400 mb-0.5">Year</label>
+                        <select
+                          required
+                          value={formData[yearField.column] || ""}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              [yearField.column]: Number(e.target.value) || e.target.value,
+                            }))
+                          }
+                          className="w-full text-sm p-2.5 bg-white dark:bg-[#00050c] border border-slate-200 dark:border-slate-800 rounded focus:ring-1 focus:ring-sea outline-hidden text-slate-800 dark:text-slate-100"
+                        >
+                          <option value="">YYYY</option>
+                          {Array.from({ length: 2027 - 1950 }, (_, i) => String(2026 - i)).map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+            }
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Nationality *</label>
-            <input
-              type="text"
-              required
-              value={formData.nat || ""}
-              onChange={(e) => setFormData(prev => ({ ...prev, nat: e.target.value }))}
-              placeholder="e.g. Botswana"
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-            />
-          </div>
+            const isMonthOrYearField = field.name.toUpperCase().includes("MONTH") || field.name.toUpperCase().includes("YEAR");
+            if (isMonthOrYearField) {
+              const prefix = field.name.toUpperCase().includes("MONTH") 
+                ? field.name.toUpperCase().split("MONTH")[0]
+                : field.name.toUpperCase().split("YEAR")[0];
+              const dayField = config.fields.find(
+                f => f.name.toUpperCase().startsWith(prefix) && f.name.toUpperCase().includes("DAY")
+              );
+              if (dayField) return null;
+            }
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Standard Grade</label>
-            <select
-              value={formData.std || "Std 1"}
-              onChange={(e) => setFormData(prev => ({ ...prev, std: e.target.value }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-            >
-              {["Std 1", "Std 2", "Std 3", "Std 4", "Std 5", "Std 6", "Std 7"].map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Dropout Incident Date</label>
-            <input
-              type="date"
-              value={formData.date || ""}
-              onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Does pupil have diagnosed SEN Disabilities?</label>
-            <select
-              value={formData.specialNeeds || "No"}
-              onChange={(e) => setFormData(prev => ({ ...prev, specialNeeds: e.target.value as any }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-            >
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Gender</label>
-            <select
-              value={formData.sex || "Male"}
-              onChange={(e) => setFormData(prev => ({ ...prev, sex: e.target.value as any }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-            >
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Death Cause (Specify if Death occurred)</label>
-            <select
-              value={formData.deathCause || "N/A"}
-              onChange={(e) => setFormData(prev => ({ ...prev, deathCause: e.target.value }))}
-              className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-1 focus:ring-prussian"
-            >
-              {DEATH_CAUSE_OPTIONS.map(dc => (
-                <option key={dc} value={dc}>{dc}</option>
-              ))}
-            </select>
-          </div>
+            // Normal rendering
+            return (
+              <div key={field.column}>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                  {field.name} {field.validation?.allow_blank === false ? "*" : ""}
+                </label>
+                {field.input_type === "select" ? (
+                  <select
+                    required={field.validation?.allow_blank === false}
+                    value={formData[field.column] || ""}
+                    onChange={(e) => setFormData(p => ({ ...p, [field.column]: e.target.value }))}
+                    className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-sea"
+                  >
+                    <option value="">-- Choose Option --</option>
+                    {field.options?.map(opt => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type={field.input_type === "number" ? "number" : "text"}
+                    required={field.validation?.allow_blank === false}
+                    disabled={!!selectedDropout && field.column === idCol}
+                    value={formData[field.column] || ""}
+                    onChange={(e) => setFormData(p => ({ ...p, [field.column]: field.input_type === "number" ? Number(e.target.value) : e.target.value }))}
+                    placeholder={` ${field.name}`}
+                    className="w-full text-sm p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-sea outline-hidden"
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       </FormModal>
 
-      {/* Delete Modal */}
+      {/* Dossier info Modal */}
+      <FormModal
+        isOpen={dossierOpen}
+        onClose={() => setDossierOpen(false)}
+        title="Dropout Dossier Tracker"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setDossierOpen(false);
+        }}
+        submitLabel="Completed Review"
+      >
+        {selectedDropout && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-900 p-4 border dark:border-slate-850 rounded-xl">
+              <div className="w-12 h-12 rounded bg-sea/10 flex items-center justify-center text-sea font-black text-xl shadow-md">
+                {String(selectedDropout[surnameCol]).charAt(0)}
+              </div>
+              <div>
+                <h4 className="text-base font-bold text-slate-900 dark:text-slate-100 uppercase">
+                  {selectedDropout[surnameCol]}, {selectedDropout[namesCol]}
+                </h4>
+                <p className="text-xs font-mono text-sea mt-0.5">ID: {selectedDropout[idCol]}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-700 dark:text-slate-300">
+              {config.fields.map(field => {
+                // Formatting display for date elements
+                if (field.name.toUpperCase().includes("DATE") && (field.name.toUpperCase().includes("MONTH") || field.name.toUpperCase().includes("YEAR"))) {
+                  return null;
+                }
+                const label = field.name.toUpperCase().includes("DAY") ? field.name.replace(/[-(\s]*DAY[-)\s]*/gi, " Date") : field.name;
+                let displayVal = selectedDropout[field.column] || "—";
+
+                if (field.name.toUpperCase().includes("DAY")) {
+                  const prefix = field.name.toUpperCase().split("DAY")[0];
+                  const mField = config.fields.find(m => m.name.toUpperCase().startsWith(prefix) && m.name.toUpperCase().includes("MONTH"));
+                  const yField = config.fields.find(y => y.name.toUpperCase().startsWith(prefix) && y.name.toUpperCase().includes("YEAR"));
+                  const d = selectedDropout[field.column];
+                  const m = mField ? selectedDropout[mField.column] : null;
+                  const y = yField ? selectedDropout[yField.column] : null;
+                  if (d && m && y) {
+                    displayVal = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+                  }
+                }
+
+                return (
+                  <div key={field.column} className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded border border-slate-100 dark:border-slate-800">
+                    <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">{label}</p>
+                    <p className="font-semibold text-slate-800 dark:text-slate-100 uppercase">{String(displayVal)}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </FormModal>
+
+      {/* Delete Confirmation Modal */}
       <FormModal
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
-        title="Confirm Incident deletion"
+        title="Confirm File Removal"
         onSubmit={(e) => {
           e.preventDefault();
           confirmDelete();
         }}
-        submitLabel="Delete record"
-        cancelLabel="Discard"
+        submitLabel="Permanently Delete File"
+        cancelLabel="Keep File"
       >
         <div className="text-center py-4">
-          <AlertCircle className="w-12 h-12 text-golden mx-auto mb-3" />
-          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">Delete Dropout Row?</h4>
+          <AlertCircle className="w-12 h-12 text-rose-500 mx-auto mb-3" />
+          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">Remove Student Dropout Profile?</h4>
           <p className="text-xs text-slate-500 mt-2">
-            Are you sure you want to remove the incident record for <strong>{selectedDropout?.surname}</strong>?
+            Are you sure you want to permanently delete the dropout file for <strong>{selectedDropout?.[surnameCol]}</strong>? This operational action is irreversible.
           </p>
         </div>
       </FormModal>

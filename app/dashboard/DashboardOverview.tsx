@@ -530,7 +530,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ data, onDr
       {activeSection === "overview" && (
         <div className="space-y-6 fade-in-up">
           {/* Quick Stats Summary Row */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-[#000A14] p-5 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center gap-4 relative group">
               <div className="p-3 bg-[#002652]/10 text-[#002652] dark:text-sky-400 rounded-xl">
                 <Users className="w-5 h-5" />
@@ -983,7 +983,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ data, onDr
       {activeSection === "flow" && (
         <div className="space-y-6 fade-in-up">
           {/* flow metric boxes */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-[#000A14] p-5 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center gap-4">
               <div className="p-3 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-650 rounded-xl">
                 <ArrowRightLeft className="w-5 h-5" />
@@ -1145,7 +1145,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ data, onDr
       {activeSection === "resources" && (
         <div className="space-y-6 fade-in-up">
           {/* resources metrics row */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-[#000A14] p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Classroom deficit</span>
               <div className="pt-1 flex items-baseline gap-2">

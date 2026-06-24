@@ -39,24 +39,61 @@ export interface ECStudent {
   lastUpdated: string;
 }
 
-const CATEGORY_LEVEL_OPTIONS = ["Baby", "Middle", "Pre-Unit"];
-const ATTENDING_OPTIONS = ["Yes", "No"];
+const CATEGORY_LEVEL_OPTIONS = [
+  "Baby Care",
+  "Day Care/Nursery",
+  "Pre-primary (Excluding Reception)",
+  "Reception"
+];
+const ATTENDING_OPTIONS = ["Half day", "Full day", "Both"];
 const SEX_OPTIONS = ["Male", "Female"];
-const NATIONALITY_OPTIONS = ["Citizen", "Non-Citizen"];
-const SOCIAL_OPTIONS = ["Ordinary", "Needy", "Orphan", "OVC", "Vulnerability"];
-const OVC_SUPPORT_OPTIONS = ["NONE", "Uniform", "Feeding", "Counseling", "Transport", "Stationery"];
+const NATIONALITY_OPTIONS = [
+  "Botswana", "Eswatini", "Lesotho", "Namibia", "South Africa", "Zambia", "Zimbabwe", "India", "United Kingdom", "United Republic of Tanzania", "United States of America", "People's Republic of China", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Anguilla", "Antigua and Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia (Plurinational State of)", "Bosnia and Herzegovina", "Brazil", "British Virgin Islands", "Brunei Darussalam", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Cayman Islands", "Central African Republic", "Chad", "Chile", "China, Hong Kong Special Administrative Region", "China, Macao Special Administrative Region", "Colombia", "Comoros", "Congo", "Cook Islands", "Costa Rica", "Côte d'Ivoire", "Croatia", "Cuba", "Curaçao", "Cyprus", "Czechia", "Democratic People's Republic of Korea", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Holy See", "Honduras", "Hungary", "Iceland", "Indonesia", "Iran (Islamic Republic of)", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Lao People's Democratic Republic", "Latin America and the Caribbean not specified", "Latvia", "Lebanon", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia (Federated States of)", "Monaco", "Mongolia", "Montenegro", "Montserrat", "Morocco", "Mozambique", "Myanmar", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Puerto Rico", "Qatar", "Republic of Korea", "Republic of Moldova", "Romania", "Russian Federation", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten (Dutch part)", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syrian Arab Republic", "Tajikistan", "Thailand", "Timor-Leste", "Togo", "Tokelau", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Turks and Caicos Islands", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela (Bolivarian Republic of)", "Viet Nam", "Yemen"
+];
+const SOCIAL_OPTIONS = ["Ordinary", "Orphan", "Needy", "Orphan & Needy", "Vulnerable"];
+const OVC_SUPPORT_OPTIONS = [
+  "N/A",
+  "Bursary",
+  "Social",
+  "Emotional/ Psychological",
+  "Bursary + Social",
+  "Bursary + Emotional/ Psychological",
+  "Social + Emotional/ Psychological",
+  "None"
+];
 const YES_NO_OPTIONS = ["Yes", "No"];
 const SEND_TYPE_OPTIONS = [
-  "NONE",
-  "Physical Disability",
-  "Visual Impairment",
-  "Hearing Impairment",
+  "N/A",
+  "Attention deficit disorder",
+  "Autism",
+  "Behaviour disorder",
+  "Blind",
+  "Cerebral Palsy",
+  "Deaf",
+  "Epilepsy",
+  "Hearing",
   "Intellectual Disability",
-  "Speech and Language Disorder",
-  "Specific Learning Difficulty",
-  "Multiple Disabilities"
+  "Physical (hunchback)",
+  "Reading, writing, spelling disorder",
+  "Speech or communication",
+  "Visual",
+  "Others"
 ];
-const SEND_SERVICE_OPTIONS = ["NONE", "Speech Therapy", "Occupational Therapy", "Sign Language", "Adaptive Tech", "Physiotherapy"];
+const SEND_SERVICE_OPTIONS = [
+  "N/A",
+  "Braille instruction",
+  "Canes, Walkers",
+  "Counseling",
+  "Glasses/lenses",
+  "Hearing Aids",
+  "Occupational therapy",
+  "Physical therapy",
+  "Prosthetics/Artificial Limbs",
+  "Sign language instruction",
+  "Speech therapy",
+  "Wheel Chair",
+  "None"
+];
 
 // Initial mock data
 const INITIAL_EC_STUDENTS: ECStudent[] = [
@@ -65,18 +102,18 @@ const INITIAL_EC_STUDENTS: ECStudent[] = [
     nationalIdPassport: "EC-2024-001",
     surname: "Mokgosi",
     studentNames: "Lerato",
-    nationality: "Citizen",
+    nationality: "Botswana",
     sex: "Female",
     dobDay: "12",
     dobMonth: "05",
     dobYear: "2020",
-    categoryLevel: "Pre-Unit",
-    attending: "Yes",
+    categoryLevel: "Pre-primary (Excluding Reception)",
+    attending: "Full day",
     studentSocialStatus: "Ordinary",
-    supportForOvc: "NONE",
+    supportForOvc: "N/A",
     specialEducationNeedAndDisability: "No",
-    typeOfSpecialEducationNeedsAndDisability: "NONE",
-    supportServiceToSend: "NONE",
+    typeOfSpecialEducationNeedsAndDisability: "N/A",
+    supportServiceToSend: "N/A",
     lastUpdated: new Date().toISOString()
   },
   {
@@ -84,18 +121,18 @@ const INITIAL_EC_STUDENTS: ECStudent[] = [
     nationalIdPassport: "EC-2024-002",
     surname: "Tau",
     studentNames: "Tshepo",
-    nationality: "Citizen",
+    nationality: "Botswana",
     sex: "Male",
     dobDay: "24",
     dobMonth: "11",
     dobYear: "2021",
-    categoryLevel: "Middle",
-    attending: "Yes",
+    categoryLevel: "Day Care/Nursery",
+    attending: "Full day",
     studentSocialStatus: "Needy",
-    supportForOvc: "Feeding",
+    supportForOvc: "Social",
     specialEducationNeedAndDisability: "Yes",
-    typeOfSpecialEducationNeedsAndDisability: "Speech and Language Disorder",
-    supportServiceToSend: "Speech Therapy",
+    typeOfSpecialEducationNeedsAndDisability: "Speech or communication",
+    supportServiceToSend: "Speech therapy",
     lastUpdated: new Date().toISOString()
   }
 ];
@@ -174,18 +211,18 @@ export const EarlyChildhoodStudentsRegistry: React.FC = () => {
     nationalIdPassport: "",
     surname: "",
     studentNames: "",
-    nationality: "Citizen",
+    nationality: "Botswana",
     sex: "Female",
     dobDay: "",
     dobMonth: "",
     dobYear: "",
-    categoryLevel: "Pre-Unit",
-    attending: "Yes",
+    categoryLevel: "Pre-primary (Excluding Reception)",
+    attending: "Half day",
     studentSocialStatus: "Ordinary",
-    supportForOvc: "NONE",
+    supportForOvc: "N/A",
     specialEducationNeedAndDisability: "No",
-    typeOfSpecialEducationNeedsAndDisability: "NONE",
-    supportServiceToSend: "NONE"
+    typeOfSpecialEducationNeedsAndDisability: "N/A",
+    supportServiceToSend: "N/A"
   };
 
   const [formData, setFormData] = useState<Partial<ECStudent>>(defaultFormState);
@@ -223,8 +260,8 @@ export const EarlyChildhoodStudentsRegistry: React.FC = () => {
     };
 
     if (dataToSave.specialEducationNeedAndDisability === "No") {
-      dataToSave.typeOfSpecialEducationNeedsAndDisability = "NONE";
-      dataToSave.supportServiceToSend = "NONE";
+      dataToSave.typeOfSpecialEducationNeedsAndDisability = "N/A";
+      dataToSave.supportServiceToSend = "N/A";
     }
 
     if (selectedStudent) {
@@ -281,6 +318,12 @@ export const EarlyChildhoodStudentsRegistry: React.FC = () => {
     <SectionContainer
       title="Early Childhood Students Registry"
       description="Manage toddler census, category levels, ages, and demographic profiles."
+      action={
+        <AddButton 
+          onClick={handleOpenAdd} 
+          label="Enroll Toddler" 
+        />
+      }
     >
       {alert && (
         <div className={`p-4 rounded-xl border flex items-center gap-3 text-xs font-bold shadow-sm ${
@@ -333,29 +376,22 @@ export const EarlyChildhoodStudentsRegistry: React.FC = () => {
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#000A14] p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-        <FilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          searchPlaceholder="Search by ID, Surname or Names..."
-          filters={[
-            {
-              key: "categoryLevel",
-              label: "Category/Level",
-              value: activeFilters.categoryLevel as string,
-              options: ["All Levels", ...CATEGORY_LEVEL_OPTIONS],
-              onChange: (val) => setFilterVal("categoryLevel", val)
-            }
-          ]}
-          onClear={clearFilters}
-        />
-        <AddButton 
-          onClick={handleOpenAdd} 
-          label="Enroll Toddler" 
-          className="bg-[#00A3A3] hover:bg-[#002652] text-white" 
-        />
-      </div>
+      <FilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by ID, Surname or Names..."
+        filters={[
+          {
+            key: "categoryLevel",
+            label: "Category/Level",
+            value: activeFilters.categoryLevel as string,
+            options: CATEGORY_LEVEL_OPTIONS,
+            allLabel: "All Categories/Levels",
+            onChange: (val) => setFilterVal("categoryLevel", val)
+          }
+        ]}
+        onClear={clearFilters}
+      />
 
       {/* Data Table */}
       <DataTable

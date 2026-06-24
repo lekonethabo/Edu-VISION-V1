@@ -143,25 +143,6 @@ export const TeacherMovementRegistry: React.FC = () => {
 
   const [formData, setFormData] = useState<Partial<ECTeacherMovement>>(defaultFormState);
 
-  // Auto-populate logic based on National ID
-  useEffect(() => {
-    if (formData.nationalIdPassport && formData.nationalIdPassport.length > 4) {
-      const existingStaff = staffItems.find(s => s.nationalIdPassport === formData.nationalIdPassport);
-      if (existingStaff && !selectedMovement) { // Don't override if editing
-        setFormData(prev => ({
-          ...prev,
-          surname: existingStaff.surname || prev.surname,
-          firstNames: existingStaff.firstNames || prev.firstNames,
-          nationality: existingStaff.nationality || prev.nationality,
-          sex: existingStaff.sex || prev.sex,
-          dobDay: existingStaff.dobDay || prev.dobDay,
-          dobMonth: existingStaff.dobMonth || prev.dobMonth,
-          dobYear: existingStaff.dobYear || prev.dobYear,
-        }));
-      }
-    }
-  }, [formData.nationalIdPassport, staffItems, selectedMovement]);
-
   const handleOpenAdd = () => {
     setSelectedMovement(null);
     setFormData(defaultFormState);
@@ -211,7 +192,23 @@ export const TeacherMovementRegistry: React.FC = () => {
   };
 
   const handleFieldChange = (field: keyof ECTeacherMovement, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      if (field === "nationalIdPassport" && value.length > 4) {
+        const existingStaff = staffItems.find(s => s.nationalIdPassport === value);
+        if (existingStaff && !selectedMovement) {
+          updated.surname = existingStaff.surname || prev.surname;
+          updated.firstNames = existingStaff.firstNames || prev.firstNames;
+          updated.nationality = existingStaff.nationality || prev.nationality;
+          updated.sex = existingStaff.sex || prev.sex;
+          updated.dobDay = existingStaff.dobDay || prev.dobDay;
+          updated.dobMonth = existingStaff.dobMonth || prev.dobMonth;
+          updated.dobYear = existingStaff.dobYear || prev.dobYear;
+          setTimeout(() => triggerAlert("Teacher found. Profile details synchronized.", "success"), 50);
+        }
+      }
+      return updated;
+    });
   };
 
   const columns: ColumnConfig<ECTeacherMovement>[] = [
@@ -226,8 +223,14 @@ export const TeacherMovementRegistry: React.FC = () => {
 
   return (
     <SectionContainer
-      title="Teacher Movement (2025)"
+      title="Teacher Movement"
       description="Record teaching staff departures, resignations, retirements, and movements."
+      action={
+        <AddButton 
+          onClick={handleOpenAdd} 
+          label="Add Movement" 
+        />
+      }
     >
       {alert && (
         <div className={`p-4 rounded-xl border flex items-center gap-3 text-xs font-bold shadow-sm ${
@@ -280,35 +283,30 @@ export const TeacherMovementRegistry: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#000A14] p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6">
-        <FilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          searchPlaceholder="Search by ID or Name..."
-          filters={[
-            {
-              key: "staffPosition",
-              label: "Position",
-              value: activeFilters.staffPosition as string,
-              options: ["All Positions", ...POSITION_OPTIONS],
-              onChange: (val) => setFilterVal("staffPosition", val)
-            },
-            {
-              key: "reasonsForLeaving",
-              label: "Reason",
-              value: activeFilters.reasonsForLeaving as string,
-              options: ["All Reasons", ...REASONS_FOR_LEAVING],
-              onChange: (val) => setFilterVal("reasonsForLeaving", val)
-            }
-          ]}
-          onClear={clearFilters}
-        />
-        <AddButton 
-          onClick={handleOpenAdd} 
-          label="Add Movement" 
-          className="bg-[#00A3A3] hover:bg-[#002652] text-white" 
-        />
-      </div>
+      <FilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by ID or Name..."
+        filters={[
+          {
+            key: "staffPosition",
+            label: "Position",
+            value: activeFilters.staffPosition as string,
+            options: POSITION_OPTIONS,
+            allLabel: "All Positions",
+            onChange: (val) => setFilterVal("staffPosition", val)
+          },
+          {
+            key: "reasonsForLeaving",
+            label: "Reason",
+            value: activeFilters.reasonsForLeaving as string,
+            options: REASONS_FOR_LEAVING,
+            allLabel: "All Reasons",
+            onChange: (val) => setFilterVal("reasonsForLeaving", val)
+          }
+        ]}
+        onClear={clearFilters}
+      />
 
       <DataTable
         data={filteredItems}
@@ -340,7 +338,7 @@ export const TeacherMovementRegistry: React.FC = () => {
                   required
                   value={formData.nationalIdPassport || ""}
                   onChange={(e) => handleFieldChange("nationalIdPassport", e.target.value)}
-                  placeholder="Enter ID to auto-fill..."
+                  placeholder="ID to auto-fill..."
                   className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg outline-none text-[#002652] dark:text-slate-200"
                 />
               </div>

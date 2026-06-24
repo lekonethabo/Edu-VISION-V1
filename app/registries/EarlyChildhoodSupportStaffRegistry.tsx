@@ -246,6 +246,12 @@ export const EarlyChildhoodSupportStaffRegistry: React.FC = () => {
     <SectionContainer
       title="Early Childhood Support Staff Registry"
       description="Manage records of early childhood support personnel, roles, and attendance."
+      action={
+        <AddButton 
+          onClick={handleOpenAdd} 
+          label="Add Staff" 
+        />
+      }
     >
       {alert && (
         <div className={`p-4 rounded-xl border flex items-center gap-3 text-xs font-bold shadow-sm ${
@@ -298,42 +304,38 @@ export const EarlyChildhoodSupportStaffRegistry: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#000A14] p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6">
-        <FilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          searchPlaceholder="Search by ID or Name..."
-          filters={[
-            {
-              key: "sex",
-              label: "Sex",
-              value: activeFilters.sex as string,
-              options: ["All Genders", ...SEX_OPTIONS],
-              onChange: (val) => setFilterVal("sex", val)
-            },
-            {
-              key: "contractType",
-              label: "Contract Type",
-              value: activeFilters.contractType as string,
-              options: ["All Types", ...CONTRACT_OPTIONS],
-              onChange: (val) => setFilterVal("contractType", val)
-            },
-            {
-              key: "staffPosition",
-              label: "Position",
-              value: activeFilters.staffPosition as string,
-              options: ["All Positions", ...POSITION_OPTIONS],
-              onChange: (val) => setFilterVal("staffPosition", val)
-            }
-          ]}
-          onClear={clearFilters}
-        />
-        <AddButton 
-          onClick={handleOpenAdd} 
-          label="Add Staff" 
-          className="bg-[#00A3A3] hover:bg-[#002652] text-white" 
-        />
-      </div>
+      <FilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by ID or Name..."
+        filters={[
+          {
+            key: "sex",
+            label: "Sex",
+            value: activeFilters.sex as string,
+            options: SEX_OPTIONS,
+            allLabel: "All Genders",
+            onChange: (val) => setFilterVal("sex", val)
+          },
+          {
+            key: "contractType",
+            label: "Contract Type",
+            value: activeFilters.contractType as string,
+            options: CONTRACT_OPTIONS,
+            allLabel: "All Contract Types",
+            onChange: (val) => setFilterVal("contractType", val)
+          },
+          {
+            key: "staffPosition",
+            label: "Position",
+            value: activeFilters.staffPosition as string,
+            options: POSITION_OPTIONS,
+            allLabel: "All Positions",
+            onChange: (val) => setFilterVal("staffPosition", val)
+          }
+        ]}
+        onClear={clearFilters}
+      />
 
       <DataTable
         data={filteredItems}

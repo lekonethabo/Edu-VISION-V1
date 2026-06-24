@@ -12,7 +12,7 @@ export const AddButton: React.FC<ButtonProps> = ({ label = "Add New", ...props }
     <button
       type="button"
       id={`btn-add-${label.toLowerCase().replace(/\s+/g, "-")}`}
-      className="inline-flex items-center gap-2 bg-prussian hover:bg-[#001c3d] text-white font-medium text-sm px-4 py-2 rounded shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-prussian focus:ring-offset-2 active:scale-98"
+      className="inline-flex items-center justify-center gap-2 bg-prussian hover:bg-[#001c3d] text-white font-bold text-sm px-6 py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-prussian focus:ring-offset-2 active:scale-98 min-w-[170px] w-full sm:w-auto"
       {...props}
     >
       <Plus className="w-4 h-4" />

@@ -81,9 +81,9 @@ const ALL_TOOLS: ToolCard[] = [
     title: "Junior Secondary Data Collection",
     icon: GraduationCap,
     description: "JS1-JS3 records hub. Comprehensive logs tracking secondary transition, core skills matrices, school staff appointments and boarding occupancy rates.",
-    status: "Offline Standby",
+    status: "Online",
     actionText: "Launch Registry",
-    targetTab: "",
+    targetTab: "dashboard",
     colorClass: "text-purple-600 bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-900/50",
     bgGradient: "from-purple-50 to-purple-100/50 dark:from-purple-950/10 dark:to-purple-950/20"
   },
@@ -92,9 +92,9 @@ const ALL_TOOLS: ToolCard[] = [
     title: "Unified Private Secondary Tool",
     icon: Building,
     description: "Licensing registries, regulatory compliance monitors, and staff certification databases for private high schools and alternative non-state systems.",
-    status: "Offline Standby",
+    status: "Online",
     actionText: "Launch Registry",
-    targetTab: "",
+    targetTab: "dashboard",
     colorClass: "text-slate-600 bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800",
     bgGradient: "from-slate-50 to-slate-100/50 dark:from-slate-800/20 dark:to-slate-800/35"
   },
@@ -103,9 +103,9 @@ const ALL_TOOLS: ToolCard[] = [
     title: "SPED Data Collection Tool",
     icon: Accessibility,
     description: "Special Education Needs (SEN) active tracker. Records assistive physical therapy allocations, specialised equipment levels, and therapist deployments.",
-    status: "Offline Standby",
+    status: "Online",
     actionText: "Launch Registry",
-    targetTab: "",
+    targetTab: "dashboard",
     colorClass: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50",
     bgGradient: "from-emerald-50 to-emerald-100/50 dark:from-emerald-950/10 dark:to-emerald-950/20"
   }
@@ -120,7 +120,7 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
   onLogout,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<"All" | "Online" | "Offline Standby">("All");
+  const [activeFilter, setActiveFilter] = useState<"All" | "Online">("All");
   const [showNotifications, setShowNotifications] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "info" | "success" | "warning" } | null>(null);
   const [activeModal, setActiveModal] = useState<ToolCard | null>(null);
@@ -362,7 +362,7 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
           
           {/* Tabs Filter */}
           <div className="flex bg-slate-100 dark:bg-slate-900 p-1.5 rounded-lg w-full md:w-auto">
-            {["All", "Online", "Offline Standby"].map(type => (
+            {["All", "Online"].map(type => (
               <button
                 key={type}
                 onClick={() => setActiveFilter(type as any)}

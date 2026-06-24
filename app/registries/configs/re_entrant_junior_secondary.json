@@ -1,0 +1,28 @@
+{
+  "form_title": "Junior Secondary Re-Entrant",
+  "fields": [
+    { "name": "NATIONAL ID/ PASSPORT", "column": "A", "input_type": "text", "validation": { "allow_blank": false } },
+    { "name": "SURNAME", "column": "B", "input_type": "text", "validation": { "allow_blank": false } },
+    { "name": "STUDENT NAMES", "column": "C", "input_type": "text", "validation": { "allow_blank": false } },
+    {
+      "name": "NATIONALITY",
+      "column": "D",
+      "input_type": "select",
+      "options": ["Botswana", "Eswatini", "Lesotho", "Namibia", "South Africa", "Zambia", "Zimbabwe", "India", "United Kingdom", "United Republic of Tanzania", "United States of America", "People's Republic of China", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Anguilla", "Antigua and Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia (Plurinational State of)", "Bosnia and Herzegovina", "Brazil", "British Virgin Islands", "Brunei Darussalam", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Cayman Islands", "Central African Republic", "Chad", "Chile", "China", "Hong Kong Special Administrative Region", "China, Macao Special Administrative Region", "Colombia", "Comoros", "Congo", "Cook Islands", "Costa Rica", "Côte d'Ivoire", "Croatia", "Cuba", "Curaçao", "Cyprus", "Czechia", "Democratic People's Republic of Korea", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Holy See", "Honduras", "Hungary", "Iceland", "Indonesia", "Iran (Islamic Republic of)", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Lao People's Democratic Republic", "Latin America and the Caribbean not specified", "Latvia", "Lebanon", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia (Federated States of)", "Monaco", "Mongolia", "Montenegro", "Montserrat", "Morocco", "Mozambique", "Myanmar", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Puerto Rico", "Qatar", "Republic of Korea", "Republic of Moldova", "Romania", "Russian Federation", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten (Dutch part)", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syrian Arab Republic", "Tajikistan", "Thailand", "Timor-Leste", "Togo", "Tokelau", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Turks and Caicos Islands", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela (Bolivarian Republic of)", "Viet Nam", "Yemen"],
+      "validation": { "allow_blank": false }
+    },
+    { "name": "SEX", "column": "E", "input_type": "select", "options": ["Male", "Female"], "validation": { "allow_blank": false } },
+    { "name": "DATE RE-ENTERED (DAY)", "column": "F", "input_type": "number", "validation": { "allow_blank": false, "min": 1, "max": 31 } },
+    { "name": "DATE RE-ENTERED (MONTH)", "column": "G", "input_type": "number", "validation": { "allow_blank": false, "min": 1, "max": 12 } },
+    { "name": "DATE RE-ENTERED (YEAR)", "column": "H", "input_type": "number", "validation": { "allow_blank": false, "min": 2024, "max": 2026 } },
+    { "name": "FORM RE-ENTERED", "column": "I", "input_type": "select", "options": ["Form 1", "Form 2", "Form 3"], "validation": { "allow_blank": false } },
+    {
+      "name": "REASONS FOR DROPPING OUT",
+      "column": "J",
+      "input_type": "select",
+      "options": ["Abuse by Parent(s)", "Abuse by Teacher(s)", "Bullying", "Child Labor", "Corporal Punishment", "Death", "Desertion", "Expulsion", "Fees", "Illness", "Marriage", "Poor Performance", "Pregnancy", "Religion", "Substance Abuse", "Truancy", "Other"],
+      "validation": { "allow_blank": true }
+    },
+    { "name": "YEAR OF DROPPING OUT", "column": "K", "input_type": "number", "validation": { "allow_blank": true, "min": 2020, "max": 2025 } }
+  ]
+}

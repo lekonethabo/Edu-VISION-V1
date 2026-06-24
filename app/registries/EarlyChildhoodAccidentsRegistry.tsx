@@ -176,24 +176,6 @@ export const EarlyChildhoodAccidentsRegistry: React.FC = () => {
 
   const [formData, setFormData] = useState<Partial<ECAccident>>(defaultFormState);
 
-  // Auto-populate logic
-  useEffect(() => {
-    if (formData.nationalIdPassport && formData.nationalIdPassport.length > 4) {
-      const existingStudent = students.find(s => s.nationalIdPassport === formData.nationalIdPassport);
-      if (existingStudent && !selectedAccident) {
-        setFormData(prev => ({
-          ...prev,
-          surname: existingStudent.surname || prev.surname,
-          studentNames: existingStudent.firstNames || prev.studentNames,
-          sex: existingStudent.sex || prev.sex,
-          dobDay: existingStudent.dobDay || prev.dobDay,
-          dobMonth: existingStudent.dobMonth || prev.dobMonth,
-          dobYear: existingStudent.dobYear || prev.dobYear,
-        }));
-      }
-    }
-  }, [formData.nationalIdPassport, students, selectedAccident]);
-
   const handleOpenAdd = () => {
     setSelectedAccident(null);
     setFormData(defaultFormState);
@@ -242,7 +224,22 @@ export const EarlyChildhoodAccidentsRegistry: React.FC = () => {
   };
 
   const handleFieldChange = (field: keyof ECAccident, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      if (field === "nationalIdPassport" && value.length > 4) {
+        const existingStudent = students.find(s => s.nationalIdPassport === value);
+        if (existingStudent && !selectedAccident) {
+          updated.surname = existingStudent.surname || prev.surname;
+          updated.studentNames = existingStudent.firstNames || prev.studentNames;
+          updated.sex = existingStudent.sex || prev.sex;
+          updated.dobDay = existingStudent.dobDay || prev.dobDay;
+          updated.dobMonth = existingStudent.dobMonth || prev.dobMonth;
+          updated.dobYear = existingStudent.dobYear || prev.dobYear;
+          setTimeout(() => triggerAlert("Student found. Profile details synchronized.", "success"), 50);
+        }
+      }
+      return updated;
+    });
   };
 
   const columns: ColumnConfig<ECAccident>[] = [
@@ -265,8 +262,14 @@ export const EarlyChildhoodAccidentsRegistry: React.FC = () => {
 
   return (
     <SectionContainer
-      title="Accidents Registry (2025)"
+      title="Accidents Registry"
       description="Record and monitor student accidents and injuries within the school premises."
+      action={
+        <AddButton 
+          onClick={handleOpenAdd} 
+          label="Log Accident" 
+        />
+      }
     >
       {alert && (
         <div className={`p-4 rounded-xl border flex items-center gap-3 text-xs font-bold shadow-sm ${
@@ -319,35 +322,30 @@ export const EarlyChildhoodAccidentsRegistry: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#000A14] p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6">
-        <FilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          searchPlaceholder="Search by ID or Name..."
-          filters={[
-            {
-              key: "categoryLevel",
-              label: "Category/Level",
-              value: activeFilters.categoryLevel as string,
-              options: ["All Categories", ...CATEGORY_OPTIONS],
-              onChange: (val) => setFilterVal("categoryLevel", val)
-            },
-            {
-              key: "typeOfAccident1",
-              label: "Accident Type 1",
-              value: activeFilters.typeOfAccident1 as string,
-              options: ["All Types", ...ACCIDENT_TYPE_1_OPTIONS],
-              onChange: (val) => setFilterVal("typeOfAccident1", val)
-            }
-          ]}
-          onClear={clearFilters}
-        />
-        <AddButton 
-          onClick={handleOpenAdd} 
-          label="Log Accident" 
-          className="bg-amber-500 hover:bg-amber-600 text-white border-0" 
-        />
-      </div>
+      <FilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by ID or Name..."
+        filters={[
+          {
+            key: "categoryLevel",
+            label: "Category/Level",
+            value: activeFilters.categoryLevel as string,
+            options: CATEGORY_OPTIONS,
+            allLabel: "All Categories/Levels",
+            onChange: (val) => setFilterVal("categoryLevel", val)
+          },
+          {
+            key: "typeOfAccident1",
+            label: "Accident Type 1",
+            value: activeFilters.typeOfAccident1 as string,
+            options: ACCIDENT_TYPE_1_OPTIONS,
+            allLabel: "All Accident Types",
+            onChange: (val) => setFilterVal("typeOfAccident1", val)
+          }
+        ]}
+        onClear={clearFilters}
+      />
 
       <DataTable
         data={filteredItems}
@@ -379,7 +377,7 @@ export const EarlyChildhoodAccidentsRegistry: React.FC = () => {
                   required
                   value={formData.nationalIdPassport || ""}
                   onChange={(e) => handleFieldChange("nationalIdPassport", e.target.value)}
-                  placeholder="Enter ID to auto-fill..."
+                  placeholder="ID to auto-fill..."
                   className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg outline-none text-[#002652] dark:text-slate-200"
                 />
               </div>
