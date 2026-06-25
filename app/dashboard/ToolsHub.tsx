@@ -398,10 +398,10 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
               <div 
                 key={tool.id}
                 onClick={() => handleLaunch(tool)}
-                className="bg-white dark:bg-[#001020] border border-slate-200 dark:border-slate-800 hover:translate-y-[-4px] hover:shadow-lg rounded-2xl p-6 transition-all duration-300 relative group flex flex-col justify-between h-auto cursor-pointer"
+                className="bg-white dark:bg-[#001020] text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 hover:translate-y-[-4px] hover:shadow-lg rounded-2xl p-6 transition-all duration-300 relative group flex flex-col justify-between h-auto cursor-pointer"
               >
                 {/* Card Top: Gradient + Icon + Title */}
-                <div className="space-y-4">
+                <div className="space-y-4 text-slate-900 dark:text-slate-100">
                   <div className={`p-3.5 rounded-2xl inline-block ${tool.colorClass}`}>
                     <IconComp className="w-7 h-7 text-current" />
                   </div>
@@ -424,7 +424,7 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-600 dark:text-slate-200 leading-relaxed font-medium">
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                     {tool.description}
                   </p>
                 </div>

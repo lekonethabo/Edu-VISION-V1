@@ -12,9 +12,7 @@ import {
   Facilities 
 } from "../types";
 import { 
-  INITIAL_STUDENTS, 
-  INITIAL_TEACHERS, 
-  INITIAL_TEXTBOOKS, 
+
   INITIAL_SCHOOL_INFO, 
   INITIAL_FACILITIES 
 } from "../constants";
@@ -49,11 +47,11 @@ function parseSimpleMarkdown(markdown: string) {
 
 export const AiAuditPanel: React.FC = () => {
   // Pull all localStorage states to aggregate the database context
-  const { items: students } = useLocalStorage<Student>("students", INITIAL_STUDENTS);
-  const { items: teachers } = useLocalStorage<Teacher>("teachers", INITIAL_TEACHERS);
-  const { items: textbooks } = useLocalStorage<Textbook>("textbooks", INITIAL_TEXTBOOKS);
-  const { items: schoolInfoList } = useLocalStorage<SchoolInfo>("school_info", [INITIAL_SCHOOL_INFO]);
-  const { items: facilitiesList } = useLocalStorage<Facilities>("facilities_stats", [INITIAL_FACILITIES]);
+  const { items: students } = useLocalStorage<Student>("students", []);
+  const { items: teachers } = useLocalStorage<Teacher>("teachers", []);
+  const { items: textbooks } = useLocalStorage<Textbook>("textbooks", []);
+  const { items: schoolInfoList } = useLocalStorage<SchoolInfo>("school_info", []);
+  const { items: facilitiesList } = useLocalStorage<Facilities>("facilities_stats", []);
 
   const schoolInfo = schoolInfoList[0] || INITIAL_SCHOOL_INFO;
   const facilities = facilitiesList[0] || INITIAL_FACILITIES;
