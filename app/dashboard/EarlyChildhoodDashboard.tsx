@@ -330,26 +330,35 @@ const DEFAULT_CSE: SavedCseRecord[] = [
 
 export const EarlyChildhoodDashboard: React.FC = () => {
   // Pull data dynamically from all standard keys suffix paths
-  const { items: students } = useLocalStorage<ECStudent>("edu_vision_ec_students", DEFAULT_EC_STUDENTS);
-  const { items: teachers } = useLocalStorage<ECTeachingStaff>("edu_vision_ec_teaching_staff", DEFAULT_EC_TEACHERS);
-  const { items: supportStaff } = useLocalStorage<ECSupportStaff>("edu_vision_ec_support_staff", DEFAULT_EC_SUPPORT);
-  const { items: dropouts } = useLocalStorage<ECDropout>("edu_vision_ec_dropouts", DEFAULT_EC_DROPOUTS);
-  const { items: transfers } = useLocalStorage<ECTransfer>("edu_vision_ec_transfers", DEFAULT_EC_TRANSFERS);
-  const { items: reEntrants } = useLocalStorage<ECReEntrant>("edu_vision_ec_re_entrants", DEFAULT_EC_RE_ENTRANTS);
-  const { items: graduates } = useLocalStorage<ECGraduate>("edu_vision_ec_graduates", DEFAULT_EC_GRADUATES);
-  const { items: abused } = useLocalStorage<ECAbusedStudent>("edu_vision_ec_abused_students", DEFAULT_EC_ABUSED);
-  const { items: accidents } = useLocalStorage<ECAccident>("edu_vision_ec_accidents", DEFAULT_EC_ACCIDENTS);
-  const { items: schoolInfoArr } = useLocalStorage<ECSchoolInfo>("edu_vision_ec_school_info", [DEFAULT_EC_SCHOOL_INFO]);
-  const { items: facilityRecords } = useLocalStorage<SavedFacilityRecord>("ec_facilities_list_v2", DEFAULT_FACILITIES);
-  const { items: monitoringRecords } = useLocalStorage<SavedMonitoringRecord>("ec_monitoring_list_v2", DEFAULT_MONITORING);
-  const { items: cseRecords } = useLocalStorage<SavedCseRecord>("ec_cse_list_v2", DEFAULT_CSE);
+  const { items: students } = useLocalStorage<ECStudent>("edu_vision_ec_students", []);
+  const { items: teachers } = useLocalStorage<ECTeachingStaff>("edu_vision_ec_teaching_staff", []);
+  const { items: supportStaff } = useLocalStorage<ECSupportStaff>("edu_vision_ec_support_staff", []);
+  const { items: dropouts } = useLocalStorage<ECDropout>("edu_vision_ec_dropouts", []);
+  const { items: transfers } = useLocalStorage<ECTransfer>("edu_vision_ec_transfers", []);
+  const { items: reEntrants } = useLocalStorage<ECReEntrant>("edu_vision_ec_re_entrants", []);
+  const { items: graduates } = useLocalStorage<ECGraduate>("edu_vision_ec_graduates", []);
+  const { items: abused } = useLocalStorage<ECAbusedStudent>("edu_vision_ec_abused_students", []);
+  const { items: accidents } = useLocalStorage<ECAccident>("edu_vision_ec_accidents", []);
+  const { items: schoolInfoArr } = useLocalStorage<ECSchoolInfo>("edu_vision_ec_school_info", []);
+  const { items: facilityRecords } = useLocalStorage<SavedFacilityRecord>("ec_facilities_list_v2", []);
+  const { items: monitoringRecords } = useLocalStorage<SavedMonitoringRecord>("ec_monitoring_list_v2", []);
+  const { items: cseRecords } = useLocalStorage<SavedCseRecord>("ec_cse_list_v2", []);
 
   const [activeTab, setActiveTab] = useState<"overview" | "demographics" | "staff" | "safety" | "facilities">("overview");
 
-  const school = schoolInfoArr[0] || DEFAULT_EC_SCHOOL_INFO;
-  const latestFacility = facilityRecords[0] || DEFAULT_FACILITIES[0];
-  const latestMonitoring = monitoringRecords[0] || DEFAULT_MONITORING[0];
-  const latestCse = cseRecords[0] || DEFAULT_CSE[0];
+  const school = schoolInfoArr[0] || {
+    schoolName: "",
+    district: "",
+    educationRegion: "",
+    centreRegistrationStatus: "",
+    centreRegistrationNumber: "",
+    ownership: "",
+    sourceElectricity: "",
+    sourceWater: ""
+  };
+  const latestFacility = facilityRecords[0];
+  const latestMonitoring = monitoringRecords[0];
+  const latestCse = cseRecords[0];
 
   // ==========================================
   // REAL-TIME ANALYTICAL METRICS CALCULATIONS

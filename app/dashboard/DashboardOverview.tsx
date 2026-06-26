@@ -60,16 +60,7 @@ import {
   SchoolInfo
 } from "../types";
 import { 
-  INITIAL_STUDENTS, 
-  INITIAL_TEACHERS, 
-  INITIAL_TEXTBOOKS, 
-  INITIAL_DROPOUTS, 
   INITIAL_FACILITIES,
-  INITIAL_SUPPORT,
-  INITIAL_TRANSFERS,
-  INITIAL_ABUSED_STUDENTS,
-  INITIAL_RE_ENTRANTS,
-  INITIAL_CSE,
   INITIAL_SCHOOL_INFO
 } from "../constants";
 
@@ -135,27 +126,27 @@ interface DashboardOverviewProps {
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ data, onDrillDown }) => {
   // Always invoke LocalStorage hooks to maintain state consistently with rest of components
-  const { items: students } = useLocalStorage<Student>("students", INITIAL_STUDENTS);
-  const { items: teachers } = useLocalStorage<Teacher>("teachers", INITIAL_TEACHERS);
-  const { items: textbooks } = useLocalStorage<Textbook>("textbooks", INITIAL_TEXTBOOKS);
-  const { items: dropouts } = useLocalStorage<Dropout>("dropouts", INITIAL_DROPOUTS);
-  const { items: facilitiesList } = useLocalStorage<Facilities>("facilities_stats", [INITIAL_FACILITIES]);
-  const { items: supportStaff } = useLocalStorage<SupportStaff>("support_staff", INITIAL_SUPPORT);
-  const { items: transfers } = useLocalStorage<Transfer>("transfers", INITIAL_TRANSFERS);
-  const { items: reEntrants } = useLocalStorage<ReEntrant>("re_entrants", INITIAL_RE_ENTRANTS);
-  const { items: abusedStudents } = useLocalStorage<AbusedStudent>("abused_students", INITIAL_ABUSED_STUDENTS);
-  const { items: cseList } = useLocalStorage<CseCategory>("cse_audit", INITIAL_CSE);
-  const { items: schoolInfoList } = useLocalStorage<SchoolInfo>("school_info", [INITIAL_SCHOOL_INFO]);
+  const { items: students } = useLocalStorage<Student>("students", []);
+  const { items: teachers } = useLocalStorage<Teacher>("teachers", []);
+  const { items: textbooks } = useLocalStorage<Textbook>("textbooks", []);
+  const { items: dropouts } = useLocalStorage<Dropout>("dropouts", []);
+  const { items: facilitiesList } = useLocalStorage<Facilities>("facilities_stats", []);
+  const { items: supportStaff } = useLocalStorage<SupportStaff>("support_staff", []);
+  const { items: transfers } = useLocalStorage<Transfer>("transfers", []);
+  const { items: reEntrants } = useLocalStorage<ReEntrant>("re_entrants", []);
+  const { items: abusedStudents } = useLocalStorage<AbusedStudent>("abused_students", []);
+  const { items: cseList } = useLocalStorage<CseCategory>("cse_audit", []);
+  const { items: schoolInfoList } = useLocalStorage<SchoolInfo>("school_info", []);
 
   const facilities = facilitiesList[0] || INITIAL_FACILITIES;
   const schoolInfo = schoolInfoList[0] || INITIAL_SCHOOL_INFO;
-  const latestCse = cseList[cseList.length - 1] || INITIAL_CSE[INITIAL_CSE.length - 1];
+  const latestCse = cseList.length ? cseList[cseList.length - 1] : undefined;
 
   // Dynamic self-calculating default fallback parameters if data prop is not passed
   const calculatedData: DashboardData = React.useMemo(() => {
     const memoFacilities = facilitiesList[0] || INITIAL_FACILITIES;
     const memoSchoolInfo = schoolInfoList[0] || INITIAL_SCHOOL_INFO;
-    const memoLatestCse = cseList[cseList.length - 1] || INITIAL_CSE[INITIAL_CSE.length - 1];
+    const memoLatestCse = cseList.length ? cseList[cseList.length - 1] : undefined;
 
     const totalStudentsCount = students.length;
     const totalTeachersCount = teachers.length;
@@ -398,7 +389,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ data, onDr
       internetStatus: internetCoverage,
       
       censusStatus: "Complete" as const,
-      cseAuditStatus: memoLatestCse && memoLatestCse.lifeSkillsOrientation === "Yes" ? "Complete" as const : "Pending" as const,
+      cseAuditStatus: memoLatestCse?.lifeSkillsOrientation === "Yes" ? "Complete" as const : "Pending" as const,
       facilitiesAuditDate: auditDateStr,
       lastUpdated: updateDateStr,
       

@@ -409,16 +409,16 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
               <div 
                 key={tool.id}
                 onClick={() => handleLaunch(tool)}
-                className="bg-white dark:bg-[#001020] border border-slate-200 dark:border-slate-800 hover:translate-y-[-4px] hover:shadow-lg rounded-2xl p-6 transition-all duration-300 relative group flex flex-col justify-between h-auto cursor-pointer"
+                className="bg-white dark:bg-[#001020] text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 hover:translate-y-[-4px] hover:shadow-lg rounded-2xl p-6 transition-all duration-300 relative group flex flex-col justify-between h-auto cursor-pointer"
               >
                 {/* Card Top: Gradient + Icon + Title */}
-                <div className="space-y-4">
-                  <div className={`p-3.5 rounded-2xl inline-block ${tool.colorClass.split(" ")[1]} ${tool.colorClass.split(" ")[0]} border ${tool.colorClass.split(" ")[2]}`}>
-                    <IconComp className="w-7 h-7" />
+                <div className="space-y-4 text-slate-900 dark:text-slate-100">
+                  <div className={`p-3.5 rounded-2xl inline-block ${tool.colorClass}`}>
+                    <IconComp className="w-7 h-7 text-current" />
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-base font-black text-slate-800 dark:text-slate-150 uppercase tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-450 transition-colors">
+                    <h3 className="text-base font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">
                       {tool.title}
                     </h3>
                     
@@ -428,14 +428,14 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
                         tool.status === "Online" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
                       }`} />
                       <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                        tool.status === "Online" ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-500"
+                        tool.status === "Online" ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"
                       }`}>
                         {tool.status}
                       </span>
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                     {tool.description}
                   </p>
                 </div>
@@ -446,7 +446,7 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
                     ID: {tool.id.toUpperCase()}
                   </span>
                   
-                  <span className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-405 font-bold uppercase tracking-wider group-hover:translate-x-1 transition-transform">
+                  <span className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-300 font-bold uppercase tracking-wider group-hover:translate-x-1 transition-transform">
                     {tool.actionText}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </span>
