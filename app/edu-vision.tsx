@@ -36,7 +36,14 @@ import { RecreationalFacilitiesRegistry } from "./resources/RecreationalFaciliti
 import { FacilitiesRegistry } from "./facilities/FacilitiesRegistry";
 import { AiAuditPanel } from "./analytics/AiAuditPanel";
 import { Sparkles, Library } from "lucide-react";
-import { ToolsHub } from "./dashboard/ToolsHub";
+import { ToolsHub } from "./dashboard/ToolsHub";import { EMISSetupRegistry } from "./registries/EMISSetupRegistry";
+const ROLE_TO_SELECTED_TOOL: Record<string, string> = {
+  PRIMARY: "primary_data",
+  JUNIOR: "junior_secondary",
+  UNIFIED: "unified_private",
+  EARLY: "early_childhood",
+  SPED: "sped_data",
+};
 
 export const EduVisionPortal: React.FC = () => {
   const [showSplash, setShowSplash] = useState<boolean>(true);
@@ -44,17 +51,36 @@ export const EduVisionPortal: React.FC = () => {
   const [isToolLaunched, setIsToolLaunched] = useState<boolean>(false);
   const [selectedTool, setSelectedTool] = useState<"primary_data" | "early_childhood" | string | null>(null);
   const [userRole, setUserRole] = useState<string>("");
+  const [userSchoolId, setUserSchoolId] = useState<string | null>(null);
+  const [userFirstLogin, setUserFirstLogin] = useState<boolean>(false);
   const [userName, setUserName] = useState("");
   const [activeTab, setActiveTab2] = useState<string>("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [isDark, setIsDark] = useState<boolean>(false);
 
-  const handleLogin = (role: string, name: string) => {
-    setUserRole(role);
-    setUserName(name);
+  const handleLogin = (user: {
+    regID: string;
+    role: string;
+    schoolId?: string | null;
+    firstLogin: boolean;
+    isActive: boolean;
+  }) => {
+    const normalizedRole = user.role.toUpperCase();
+    setUserRole(normalizedRole);
+    setUserName(user.regID);
+    setUserSchoolId(user.schoolId ?? null);
+    setUserFirstLogin(user.firstLogin);
     setIsAuthenticated(true);
-    setIsToolLaunched(false);
-    setSelectedTool(null);
+
+    if (user.firstLogin && ROLE_TO_SELECTED_TOOL[normalizedRole]) {
+      setSelectedTool(ROLE_TO_SELECTED_TOOL[normalizedRole]);
+      setActiveTab2("school");
+      setIsToolLaunched(true);
+    } else {
+      setIsToolLaunched(false);
+      setSelectedTool(null);
+      setActiveTab2("dashboard");
+    }
   };
 
   const handleLogout = () => {
@@ -62,6 +88,10 @@ export const EduVisionPortal: React.FC = () => {
     setIsToolLaunched(false);
     setSelectedTool(null);
     setActiveTab2("dashboard");
+    setUserRole("");
+    setUserSchoolId(null);
+    setUserFirstLogin(false);
+    setUserName("");
   };
 
   if (showSplash) {
@@ -99,7 +129,7 @@ export const EduVisionPortal: React.FC = () => {
       case "ece_dashboard":
         return <EarlyChildhoodDashboard />;
       case "ece_school":
-        return <SchoolInfoRegistry toolType="EARLY" />;// Removed EarlyChildhoodSchoolInfo as requested and mapped to consolidated component
+        return <SchoolInfoRegistry toolType="EARLY" userRole={userRole} userSchoolId={userSchoolId} />;// Removed EarlyChildhoodSchoolInfo as requested and mapped to consolidated component
       case "ece_students":
         return <EarlyChildhoodStudentsRegistry />;
       case "ece_transfers":
@@ -137,7 +167,7 @@ export const EduVisionPortal: React.FC = () => {
           "sped_data": "SPED"
         };
         const resolvedSchoolType = selectedTool ? (mappingSchool[selectedTool] || "PRIMARY") : "PRIMARY";
-        return <SchoolInfoRegistry key={`school-${resolvedSchoolType}`} toolType={resolvedSchoolType} />;
+        return <SchoolInfoRegistry key={`school-${resolvedSchoolType}`} toolType={resolvedSchoolType} userRole={userRole} userSchoolId={userSchoolId} />;
       case "students":
         let mapping: any = {
           "primary_data": "PRIMARY",
@@ -196,6 +226,8 @@ export const EduVisionPortal: React.FC = () => {
         return <CseAuditRegistry />;
       case "textbooks":
         return <TextbooksRegistry />;
+      case "emis_setup":
+        return <EMISSetupRegistry />;
       case "furniture":
         return <FurnitureRegistry />;
       case "equipment":

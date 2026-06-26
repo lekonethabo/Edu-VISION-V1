@@ -115,8 +115,14 @@ const getFieldSection = (fieldName: string): string => {
   return "Section 3: Institutional Services, Infrastructure & Utilities";
 };
 
-export const SchoolInfoRegistry: React.FC<{ toolType?: ToolLevel }> = ({
+export const SchoolInfoRegistry: React.FC<{
+  toolType?: ToolLevel;
+  userRole?: string;
+  userSchoolId?: string | null;
+}> = ({
   toolType = "PRIMARY",
+  userRole,
+  userSchoolId,
 }) => {
   const [activeTool, setActiveTool] = useState<ToolLevel>(toolType);
   const config = JSON_CONFIGS[activeTool] as JsonConfig;
@@ -124,11 +130,13 @@ export const SchoolInfoRegistry: React.FC<{ toolType?: ToolLevel }> = ({
 
   return (
     <DynamicSchoolInfoRegistryWrapper
-      key={activeTool}
+      key={`${activeTool}-${userRole}-${userSchoolId}`}
       activeTool={activeTool}
       config={config}
       storageKey={storageKey}
       onChangeTool={setActiveTool}
+      userRole={userRole}
+      userSchoolId={userSchoolId}
     />
   );
 };
@@ -138,16 +146,18 @@ const DynamicSchoolInfoRegistryWrapper: React.FC<{
   config: JsonConfig;
   storageKey: string;
   onChangeTool: (tool: ToolLevel) => void;
-}> = ({ activeTool, config, storageKey, onChangeTool }) => {
+  userRole?: string;
+  userSchoolId?: string | null;
+}> = ({ activeTool, config, storageKey, onChangeTool, userRole, userSchoolId }) => {
   // 1. Database Persistence
   const [items, setItems] = useState<DynamicSchool[]>([]);
   const [isDataLoading, setIsDataLoading] = useState<boolean>(true);
 
   const fetchSchools = async () => {
     setIsDataLoading(true);
-    const result = await getSchoolsAction(activeTool);
+    const result = await getSchoolsAction(activeTool, userRole, userSchoolId);
     if (result.success && result.data) {
-      setItems(result.data);
+      setItems(result.data as DynamicSchool[]);
     } else {
       triggerAlert(result.error || "Failed to load school profiles.", "error");
     }

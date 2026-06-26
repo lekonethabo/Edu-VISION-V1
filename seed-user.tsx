@@ -1,41 +1,64 @@
-import { PrismaClient } from './generated/prisma/client';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import bcrypt from 'bcryptjs';
-import 'dotenv/config';
-
-// Parse DATABASE_URL to establish connection options
-const dbUrl = new URL(process.env.DATABASE_URL || "");
-
-const dbAdapter = new PrismaMariaDb({
-    host: dbUrl.hostname,
-    port: dbUrl.port ? parseInt(dbUrl.port) : 3306,
-    user: dbUrl.username,
-    password: dbUrl.password,
-    database: dbUrl.pathname.substring(1),
-    connectTimeout: 10000, // Increase connection timeout to 10 seconds
-    ssl: {
-        rejectUnauthorized: false
-    }
-});
-
-const prisma = new PrismaClient({ adapter: dbAdapter });
+import { prisma } from './lib/db';
 
 async function main() {
-    const regID = 'E5/7/29';
-    const plainPassword = 'password321'; // Replace with your desired password
+    const emisRegID = process.env.EMIS_ADMIN_REGID ?? 'EMIS-ADMIN';
+    const emisPassword = process.env.EMIS_ADMIN_PASSWORD ?? 'emisPassword123!';
+    const schoolRegID = process.env.SCHOOL_ADMIN_REGID ?? 'E5/7/29';
+    const schoolPassword = process.env.SCHOOL_ADMIN_PASSWORD ?? 'schoolPassword123!';
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+    const hashedEmisPassword = await bcrypt.hash(emisPassword, 10);
+    const hashedSchoolPassword = await bcrypt.hash(schoolPassword, 10);
 
-    // Create the user
-    const user = await prisma.user.create({
-        data: {
-            regID: regID,
-            password: hashedPassword,
+    const emisUser = await prisma.user.upsert({
+        where: { regID: emisRegID },
+        update: {
+            password: hashedEmisPassword,
+            role: 'EMIS',
+            firstLogin: false,
+            passwordResetRequired: false,
+            isActive: true,
+        },
+        create: {
+            regID: emisRegID,
+            password: hashedEmisPassword,
+            role: 'EMIS',
+            firstLogin: false,
+            passwordResetRequired: false,
+            isActive: true,
         },
     });
 
-    console.log('Created user:', user);
+    const school = await prisma.school.upsert({
+        where: { id: schoolRegID },
+        update: {
+            name: 'Example Primary School',
+            toolType: 'PRIMARY',
+            createdById: emisUser.regID,
+        },
+        create: {
+            id: schoolRegID,
+            name: 'Example Primary School',
+            toolType: 'PRIMARY',
+            createdById: emisUser.regID,
+            users: {
+                create: {
+                    regID: schoolRegID,
+                    password: hashedSchoolPassword,
+                    role: 'PRIMARY',
+                    firstLogin: true,
+                    passwordResetRequired: true,
+                    isActive: true,
+                },
+            },
+        },
+    });
+
+    console.log('EMIS user:', emisUser.regID);
+    console.log('School record:', school.id);
+    console.log('Use these credentials to log in:');
+    console.log(`  EMIS admin: ${emisRegID} / ${emisPassword}`);
+    console.log(`  School admin: ${schoolRegID} / ${schoolPassword}`);
 }
 
 main()

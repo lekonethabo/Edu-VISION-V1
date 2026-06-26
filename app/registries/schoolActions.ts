@@ -1,41 +1,49 @@
 "use server";
 
-import { PrismaClient } from "../../generated/prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import "dotenv/config";
+import { prisma } from "../../lib/db";
+import { SchoolType } from "../../generated/prisma/enums";
 
-const dbUrl = new URL(process.env.DATABASE_URL || "");
-
-const dbAdapter = new PrismaMariaDb({
-  host: dbUrl.hostname,
-  port: dbUrl.port ? parseInt(dbUrl.port) : 3306,
-  user: dbUrl.username,
-  password: dbUrl.password,
-  database: dbUrl.pathname.substring(1),
-  connectTimeout: 10000,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
-
-const prisma = new PrismaClient({ adapter: dbAdapter });
-
-export async function getSchoolsAction(toolType: string) {
+export async function getSchoolsAction(
+  toolType: string,
+  userRole?: string,
+  schoolId?: string | null,
+) {
   try {
+    const baseFilter: any = { toolType };
+
+    const schoolFilter = userRole && ["PRIMARY", "JUNIOR", "UNIFIED", "EARLY", "SPED"].includes(userRole)
+      ? { id: schoolId }
+      : {};
+
     const schools = await prisma.school.findMany({
-      where: { toolType },
+      where: {
+        ...baseFilter,
+        ...schoolFilter,
+      },
       orderBy: { createdAt: "desc" },
+      include: {
+        fields: true,
+      },
     });
 
-    // Map database results back to the DynamicSchool shape expected by the frontend
+    // Map SchoolField records into the flattened school object because the frontend expects column keys
     return {
       success: true,
       data: schools.map((s) => {
-        const parsedData = typeof s.data === "string" ? JSON.parse(s.data) : s.data;
-        return {
+        const flattened: Record<string, any> = {
           id: s.id,
-          ...parsedData,
+          name: s.name,
+          toolType: s.toolType,
+          createdById: s.createdById,
+          createdAt: s.createdAt,
+          updatedAt: s.updatedAt,
         };
+
+        s.fields?.forEach((field) => {
+          flattened[field.column] = field.value ?? "";
+        });
+
+        return flattened;
       }),
     };
   } catch (error) {
@@ -57,18 +65,23 @@ export async function addSchoolAction(school: any, toolType: string) {
       return { success: false, error: `A school with Registration Number ${id} already exists.` };
     }
 
-    const nameField = Object.entries(dataFields).find(([key, _]) => 
-      key.toUpperCase() === "A" || key === "schoolName" || String(key).includes("name")
-    );
-    // Standard name field resolution or fallback
+    const fieldEntries = Object.entries(dataFields).filter(([key]) => /^[A-Z]{1,2}$/.test(key));
+
+    const nameField = fieldEntries.find(([key]) => key.toUpperCase() === "A");
     const name = nameField ? String(nameField[1]) : "Unnamed School";
 
     await prisma.school.create({
       data: {
         id,
         name,
-        toolType,
-        data: dataFields,
+        toolType: toolType as SchoolType,
+        fields: {
+          create: fieldEntries.map(([column, value]) => ({
+            fieldName: column,
+            column,
+            value: value === undefined || value === null ? null : String(value),
+          })),
+        },
       },
     });
 
@@ -83,17 +96,24 @@ export async function updateSchoolAction(school: any, toolType: string) {
   try {
     const { id, ...dataFields } = school;
 
-    const nameField = Object.entries(dataFields).find(([key, _]) => 
-      key.toUpperCase() === "A" || key === "schoolName" || String(key).includes("name")
-    );
+    const fieldEntries = Object.entries(dataFields).filter(([key]) => /^[A-Z]{1,2}$/.test(key));
+
+    const nameField = fieldEntries.find(([key]) => key.toUpperCase() === "A");
     const name = nameField ? String(nameField[1]) : "Unnamed School";
 
     await prisma.school.update({
       where: { id },
       data: {
         name,
-        toolType,
-        data: dataFields,
+        toolType: toolType as SchoolType,
+        fields: {
+          deleteMany: {},
+          create: fieldEntries.map(([column, value]) => ({
+            fieldName: column,
+            column,
+            value: value === undefined || value === null ? null : String(value),
+          })),
+        },
       },
     });
 
@@ -106,6 +126,9 @@ export async function updateSchoolAction(school: any, toolType: string) {
 
 export async function deleteSchoolAction(id: string) {
   try {
+    await prisma.schoolField.deleteMany({
+      where: { schoolId: id },
+    });
     await prisma.school.delete({
       where: { id },
     });

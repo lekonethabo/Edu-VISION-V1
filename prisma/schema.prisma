@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -8,6 +5,23 @@ generator client {
 
 datasource db {
   provider = "mysql"
+}
+
+enum UserRole {
+  EMIS
+  PRIMARY
+  JUNIOR
+  UNIFIED
+  EARLY
+  SPED
+}
+
+enum SchoolType {
+  PRIMARY
+  JUNIOR
+  UNIFIED
+  EARLY
+  SPED
 }
 
 model AIInteraction {
@@ -18,15 +32,73 @@ model AIInteraction {
 }
 
 model User {
-  regID    String @id @unique
-  password String
+  regID                 String   @id @unique
+  password              String
+  role                  UserRole @default(PRIMARY)
+  school                School?  @relation("SchoolUsers", fields: [schoolId], references: [id])
+  schoolId              String?
+  createdSchools        School[] @relation("SchoolCreatedBy")
+  firstLogin            Boolean  @default(true)
+  passwordResetRequired Boolean  @default(true)
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @default(now()) @updatedAt
 }
 
 model School {
-  id        String   @id @unique
-  name      String
-  toolType  String
-  data      Json
+  id          String      @id @unique
+  name        String
+  toolType    SchoolType
+  createdBy   User?       @relation("SchoolCreatedBy", fields: [createdById], references: [regID])
+  createdById String?
+  users       User[]      @relation("SchoolUsers")
+  fields      SchoolField[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model SchoolField {
+  id        String   @id @default(uuid())
+  school    School   @relation(fields: [schoolId], references: [id])
+  schoolId  String
+  fieldName String
+  column    String
+  value     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model District {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  code      String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Region {
+  id        String      @id @default(uuid())
+  name      String      @unique
+  code      String?     @unique
+  subregions SubRegion[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model SubRegion {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  code      String?  @unique
+  region    Region   @relation(fields: [regionId], references: [id])
+  regionId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EducationRegion {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  code      String?  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

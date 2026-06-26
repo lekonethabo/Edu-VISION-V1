@@ -14,7 +14,13 @@ import { GeometricLogo } from "../components/GeometricLogo";
 import { loginAction } from "./actions";
 
 interface LandingPageProps {
-  onLogin: (role: string, name: string) => void;
+  onLogin: (user: {
+    regID: string;
+    role: string;
+    schoolId?: string | null;
+    firstLogin: boolean;
+    isActive: boolean;
+  }) => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
@@ -32,8 +38,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
       const result = await loginAction(regID.trim(), password);
 
       if (result.success && result.user) {
-        // Authenticated — pass regID as both role and name for the portal to use
-        onLogin("School Administrator", result.user.regID);
+        onLogin({
+          regID: result.user.regID,
+          role: result.user.role,
+          schoolId: result.user.schoolId ?? null,
+          firstLogin: result.user.firstLogin,
+          isActive: result.user.isActive,
+        });
       } else {
         setError(result.error || "Authentication failed. Please try again.");
       }

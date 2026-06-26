@@ -16,5 +16,14 @@ View your app in AI Studio: https://ai.studio/apps/368aa3fc-5301-42fd-8dd4-8a587
 1. Install dependencies:
    `npm install`
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+3. Seed the test users:
+   `npm run seed`
+4. Run the app:
    `npm run dev`
+
+## Test credentials
+- EMIS admin: `EMIS-ADMIN`
+- Password: `emisPassword123!`
+
+- School admin: `E5/7/29`
+- Password: `schoolPassword123!`

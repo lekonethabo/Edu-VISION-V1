@@ -55,6 +55,17 @@ const NOTIFICATIONS = [
 // Raw Tools definition matching remaining items
 const ALL_TOOLS: ToolCard[] = [
   {
+    id: "emissetup",
+    title: "EMIS Setup & Dropdowns",
+    icon: Sliders,
+    description: "Configure system dropdown options for districts, regions, education regions, and subregions.",
+    status: "Online",
+    actionText: "Open Setup",
+    targetTab: "emis_setup",
+    colorClass: "text-[#0084A3] bg-sky-50 dark:bg-sky-950/20 border-sky-200 dark:border-sky-900/50",
+    bgGradient: "from-sky-50 to-sky-100/50 dark:from-sky-950/10 dark:to-sky-950/20"
+  },
+  {
     id: "early_childhood",
     title: "Early Childhood Data Collection",
     icon: Baby,

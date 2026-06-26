@@ -1,32 +1,17 @@
 "use server";
 
-import { PrismaClient } from "../../generated/prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { prisma } from "../../lib/db";
 import bcrypt from "bcryptjs";
-import "dotenv/config";
-
-// Parse DATABASE_URL for the MariaDB adapter
-const dbUrl = new URL(process.env.DATABASE_URL || "");
-
-const dbAdapter = new PrismaMariaDb({
-  host: dbUrl.hostname,
-  port: dbUrl.port ? parseInt(dbUrl.port) : 3306,
-  user: dbUrl.username,
-  password: dbUrl.password,
-  database: dbUrl.pathname.substring(1),
-  connectTimeout: 10000,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
-
-const prisma = new PrismaClient({ adapter: dbAdapter });
 
 export type LoginResult = {
   success: boolean;
   error?: string;
   user?: {
     regID: string;
+    role: string;
+    schoolId?: string | null;
+    firstLogin: boolean;
+    isActive: boolean;
   };
 };
 
@@ -48,6 +33,10 @@ export async function loginAction(
       return { success: false, error: "Invalid registration number or password." };
     }
 
+    if (!user.isActive) {
+      return { success: false, error: "This account has been deactivated. Contact EMIS support." };
+    }
+
     // Verify password using bcrypt
     const isValid = await bcrypt.compare(password, user.password);
 
@@ -59,6 +48,10 @@ export async function loginAction(
       success: true,
       user: {
         regID: user.regID,
+        role: user.role,
+        schoolId: user.schoolId ?? null,
+        firstLogin: user.firstLogin,
+        isActive: user.isActive,
       },
     };
   } catch (error) {
