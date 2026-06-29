@@ -74,7 +74,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
               Edu-<span className="text-sea">VISION</span> EMIS
             </h1>
             <p className="text-xs text-slate-500 font-medium">
-              Botswana Educational Management Indicators System 
+              Botswana Educational Management Indicators System
             </p>
           </div>
         </motion.div>
