@@ -27,6 +27,8 @@ import {
   ArrowLeft,
   GraduationCap,
   ArrowRightLeft,
+  TrendingUp,
+  Building2,
   Activity,
   Eye
 } from "lucide-react";
@@ -65,51 +67,115 @@ export const Sidebar: React.FC<SidebarProps> = ({
         return "Exit Unified Hub";
       case "sped_data":
         return "Exit SPED Hub";
+      case "system_admin":
+        return "Exit Admin Hub";
       default:
         return "Exit Primary Hub";
     }
   };
 
-  const primaryMenuItems = [
-    { id: "dashboard", label: "Dashboard overview", icon: LayoutDashboard },
-    { id: "school", label: "School Info", icon: Building },
-    { id: "students", label: "Students Registry", icon: Users },
-    { id: "transfers", label: selectedTool === "sped_data" ? "Transition to Primary" : "Transfers", icon: ArrowLeftRight },
-    { id: "re_entrants", label: "Re-entrants", icon: UserPlus },
-    { id: "dropouts", label: "Dropouts", icon: UserMinus },
-    { id: "abused_students", label: "Abused Students", icon: ShieldAlert },
-    { id: "teachers", label: "Teaching Staff", icon: UserCheck },
-    { id: "support", label: "Support Staff", icon: UserCog },
-    { id: "cse", label: "CSE & Life Skills", icon: Heart },
-    { id: "textbooks", label: "Textbooks Inventory", icon: BookOpen },
-    { id: "furniture", label: "Furniture Count", icon: Layers },
-    { id: "equipment", label: "Equipment Status", icon: Wrench },
-    { id: "equipment_disability", label: "Disability Equipment", icon: Accessibility },
-    { id: "facilities", label: "Facilities Overview", icon: Hammer },
-    { id: "boarding", label: "Boarding Facilities", icon: Home },
-    { id: "recreational", label: "Recreational Tracks", icon: Trophy }
+  const dashboardItem = selectedTool === "system_admin"
+    ? { id: "system_admin", label: "Admin Dashboard overview", icon: LayoutDashboard }
+    : isEce 
+      ? { id: "ece_dashboard", label: "ECCE Dashboard overview", icon: LayoutDashboard }
+      : { id: "dashboard", label: "Dashboard overview", icon: LayoutDashboard };
+
+  const primaryMenuGroups = [
+    {
+      title: "School Info",
+      items: [
+        { id: "school", label: "School Info", icon: Building },
+      ]
+    },
+    {
+      title: "Students",
+      items: [
+        { id: "students", label: "Students Registry", icon: Users },
+        { id: "transfers", label: selectedTool === "sped_data" ? "Transition to Primary" : "Transfers", icon: ArrowLeftRight },
+        { id: "re_entrants", label: "Re-entrants", icon: UserPlus },
+        { id: "dropouts", label: "Dropouts", icon: UserMinus },
+        { id: "abused_students", label: "Abused Students", icon: ShieldAlert },
+        { id: "cse", label: "CSE & Life Skills", icon: Heart },
+      ]
+    },
+    {
+      title: "Staff",
+      items: [
+        { id: "teachers", label: "Teaching Staff", icon: UserCheck },
+        { id: "support", label: "Support Staff", icon: UserCog },
+      ]
+    },
+    {
+      title: "Resources & Facilities",
+      items: [
+        { id: "facilities", label: "Facilities Overview", icon: Hammer },
+        { id: "boarding", label: "Boarding Facilities", icon: Home },
+        { id: "recreational", label: "Recreational Tracks", icon: Trophy },
+        { id: "textbooks", label: "Textbooks Inventory", icon: BookOpen },
+        { id: "furniture", label: "Furniture Count", icon: Layers },
+        { id: "equipment", label: "Equipment Status", icon: Wrench },
+        { id: "equipment_disability", label: "Disability Equipment", icon: Accessibility },
+      ]
+    }
   ];
 
-  const eceMenuItems = [
-    { id: "ece_dashboard", label: "ECCE Dashboard overview", icon: LayoutDashboard },
-    { id: "ece_school", label: "School Info", icon: Building },
-    { id: "ece_students", label: "Students Registry", icon: Users },
-    { id: "ece_transfers", label: "Transfers Registry", icon: ArrowLeftRight },
-    { id: "ece_dropouts", label: "Dropouts Registry", icon: UserMinus },
-    { id: "ece_re_entrants", label: "Re-entrants Registry", icon: UserPlus },
-    { id: "ece_graduates", label: "Pre-Primary Graduation", icon: GraduationCap },
-    { id: "ece_teachers", label: "Teaching Staff", icon: Briefcase },
-    { id: "ece_teacher_movement", label: "Teacher Movement", icon: ArrowRightLeft },
-    { id: "ece_special_programme", label: "Special Programme", icon: Award },
-    { id: "ece_abused_students", label: "Abused Students", icon: ShieldAlert },
-    { id: "ece_accidents", label: "Accidents", icon: Activity },
-    { id: "ece_support", label: "Support Staff", icon: Users },
-    { id: "ece_facilities", label: "School Facilities", icon: Hammer },
-    { id: "ece_monitoring", label: "Monitoring & Supervision", icon: Eye },
-    { id: "ece_cse", label: "CSE & Life Skills", icon: Heart },
+  const eceMenuGroups = [
+    {
+      title: "School Info",
+      items: [
+        { id: "ece_school", label: "School Info", icon: Building },
+        { id: "ece_monitoring", label: "Monitoring & Supervision", icon: Eye },
+      ]
+    },
+    {
+      title: "Students",
+      items: [
+        { id: "ece_students", label: "Students Registry", icon: Users },
+        { id: "ece_transfers", label: "Transfers Registry", icon: ArrowLeftRight },
+        { id: "ece_dropouts", label: "Dropouts Registry", icon: UserMinus },
+        { id: "ece_re_entrants", label: "Re-entrants Registry", icon: UserPlus },
+        { id: "ece_graduates", label: "Pre-Primary Graduation", icon: GraduationCap },
+        { id: "ece_abused_students", label: "Abused Students", icon: ShieldAlert },
+        { id: "ece_accidents", label: "Accidents", icon: Activity },
+        { id: "ece_cse", label: "CSE & Life Skills", icon: Heart },
+      ]
+    },
+    {
+      title: "Staff",
+      items: [
+        { id: "ece_teachers", label: "Teaching Staff", icon: Briefcase },
+        { id: "ece_teacher_movement", label: "Teacher Movement", icon: ArrowRightLeft },
+        { id: "ece_special_programme", label: "Special Programme", icon: Award },
+        { id: "ece_support", label: "Support Staff", icon: Users },
+      ]
+    },
+    {
+      title: "Resources & Facilities",
+      items: [
+        { id: "ece_facilities", label: "School Facilities", icon: Hammer },
+      ]
+    }
   ];
 
-  const menuItems = isEce ? eceMenuItems : primaryMenuItems;
+  const systemAdminMenuGroups = [
+    {
+      title: "System Administration",
+      items: [
+        { id: "overview", label: "Global Overview", icon: Activity },
+        { id: "analytics", label: "Deep Analytics", icon: TrendingUp },
+        { id: "schools", label: "Schools & Infrastructure", icon: Building2 },
+        { id: "students", label: "Student Welfare", icon: GraduationCap },
+        { id: "staff", label: "Staff & HR", icon: Briefcase },
+        { id: "users", label: "User Access & Audit", icon: Users },
+      ]
+    }
+  ];
+
+  const menuGroups = selectedTool === "system_admin" 
+    ? systemAdminMenuGroups 
+    : isEce 
+      ? eceMenuGroups 
+      : primaryMenuGroups;
 
   return (
     <>
@@ -167,54 +233,54 @@ export const Sidebar: React.FC<SidebarProps> = ({
               Main Board
             </span>
             <ul className="space-y-1">
-              {menuItems.slice(0, 1).map((item) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      setMobileMenuOpen(false);
-                    }}
-                    id={`sidebar-tab-${item.id}`}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded text-xs font-bold transition-all text-left ${
-                      activeTab === item.id
-                        ? "bg-sea/25 text-white border-l-4 border-sea pl-2.5"
-                        : "text-slate-300 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <item.icon className="w-4 h-4 flex-shrink-0" />
-                    <span>{item.label}</span>
-                  </button>
-                </li>
-              ))}
+              <li>
+                <button
+                  onClick={() => {
+                    setActiveTab(dashboardItem.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  id={`sidebar-tab-${dashboardItem.id}`}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded text-xs font-bold transition-all text-left ${
+                    activeTab === dashboardItem.id
+                      ? "bg-sea/25 text-white border-l-4 border-sea pl-2.5"
+                      : "text-slate-300 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <dashboardItem.icon className="w-4 h-4 flex-shrink-0" />
+                  <span>{dashboardItem.label}</span>
+                </button>
+              </li>
             </ul>
           </div>
 
-          <div>
-            <span className="text-[10px] uppercase font-mono font-bold text-slate-400 tracking-widest block mb-2 px-1 text-left">
-              {isEce ? "ECCE Core Workspaces" : "Operational Registries"}
-            </span>
-            <ul className="space-y-1">
-              {menuItems.slice(1).map((item) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      setMobileMenuOpen(false);
-                    }}
-                    id={`sidebar-tab-${item.id}`}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded text-xs font-bold transition-all text-left ${
-                      activeTab === item.id
-                        ? "bg-sea/25 text-white border-l-4 border-sea pl-2.5"
-                        : "text-slate-300 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <item.icon className="w-4 h-4 flex-shrink-0" />
-                    <span>{item.label}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {menuGroups.map((group, idx) => (
+            <div key={idx}>
+              <span className="text-[10px] uppercase font-mono font-bold text-slate-400 tracking-widest block mb-2 px-1 text-left">
+                {group.title}
+              </span>
+              <ul className="space-y-1">
+                {group.items.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setMobileMenuOpen(false);
+                      }}
+                      id={`sidebar-tab-${item.id}`}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded text-xs font-bold transition-all text-left ${
+                        activeTab === item.id
+                          ? "bg-sea/25 text-white border-l-4 border-sea pl-2.5"
+                          : "text-slate-300 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <item.icon className="w-4 h-4 flex-shrink-0" />
+                      <span>{item.label}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </nav>
 
         {/* Footer Audit Signature */}
