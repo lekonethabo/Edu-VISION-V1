@@ -19,7 +19,8 @@ import {
   ChevronRight,
   X,
   Sun,
-  Moon
+  Moon,
+  ShieldCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { GeometricLogo } from "../components/GeometricLogo";
@@ -54,17 +55,6 @@ const NOTIFICATIONS = [
 
 // Raw Tools definition matching remaining items
 const ALL_TOOLS: ToolCard[] = [
-  {
-    id: "emissetup",
-    title: "EMIS Setup & Dropdowns",
-    icon: Sliders,
-    description: "Configure system dropdown options for districts, regions, education regions, and subregions.",
-    status: "Online",
-    actionText: "Open Setup",
-    targetTab: "emis_setup",
-    colorClass: "text-[#0084A3] bg-sky-50 dark:bg-sky-950/20 border-sky-200 dark:border-sky-900/50",
-    bgGradient: "from-sky-50 to-sky-100/50 dark:from-sky-950/10 dark:to-sky-950/20"
-  },
   {
     id: "early_childhood",
     title: "Early Childhood Data Collection",
@@ -119,6 +109,17 @@ const ALL_TOOLS: ToolCard[] = [
     targetTab: "dashboard",
     colorClass: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50",
     bgGradient: "from-emerald-50 to-emerald-100/50 dark:from-emerald-950/10 dark:to-emerald-950/20"
+  },
+  {
+    id: "system_admin",
+    title: "System Administration",
+    icon: ShieldCheck,
+    description: "Super Admin dashboard for managing users, roles, system-wide policies, and audit logs. Complete access to backend configurations.",
+    status: "Online",
+    actionText: "Enter Dashboard",
+    targetTab: "system_admin",
+    colorClass: "text-rose-600 bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50",
+    bgGradient: "from-rose-50 to-rose-100/50 dark:from-rose-950/10 dark:to-rose-950/20"
   }
 ];
 
@@ -168,13 +169,17 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
 
   // Filtering tools
   const filteredTools = useMemo(() => {
-    return ALL_TOOLS.filter(tool => {
+    let tools = ALL_TOOLS;
+    if (userRole !== "super_admin") {
+      tools = tools.filter(t => t.id !== "system_admin");
+    }
+    return tools.filter(tool => {
       const matchesSearch = tool.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             tool.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesFilter = activeFilter === "All" || tool.status === activeFilter;
       return matchesSearch && matchesFilter;
     });
-  }, [searchQuery, activeFilter]);
+  }, [searchQuery, activeFilter, userRole]);
 
   return (
     <div className={`min-h-screen ${isDark ? "dark bg-[#00050c] text-white" : "bg-slate-50 text-slate-900"} p-4 md:p-8 space-y-8 font-sans transition-all duration-300`}>
@@ -409,16 +414,16 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
               <div 
                 key={tool.id}
                 onClick={() => handleLaunch(tool)}
-                className="bg-white dark:bg-[#001020] text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 hover:translate-y-[-4px] hover:shadow-lg rounded-2xl p-6 transition-all duration-300 relative group flex flex-col justify-between h-auto cursor-pointer"
+                className="bg-white dark:bg-[#001020] border border-slate-200 dark:border-slate-800 hover:translate-y-[-4px] hover:shadow-lg rounded-2xl p-6 transition-all duration-300 relative group flex flex-col justify-between h-auto cursor-pointer"
               >
                 {/* Card Top: Gradient + Icon + Title */}
-                <div className="space-y-4 text-slate-900 dark:text-slate-100">
-                  <div className={`p-3.5 rounded-2xl inline-block ${tool.colorClass}`}>
-                    <IconComp className="w-7 h-7 text-current" />
+                <div className="space-y-4">
+                  <div className={`p-3.5 rounded-2xl inline-block ${tool.colorClass.split(" ")[1]} ${tool.colorClass.split(" ")[0]} border ${tool.colorClass.split(" ")[2]}`}>
+                    <IconComp className="w-7 h-7" />
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-base font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">
+                    <h3 className="text-base font-black text-slate-800 dark:text-slate-150 uppercase tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-450 transition-colors">
                       {tool.title}
                     </h3>
                     
@@ -428,14 +433,14 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
                         tool.status === "Online" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
                       }`} />
                       <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                        tool.status === "Online" ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"
+                        tool.status === "Online" ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-500"
                       }`}>
                         {tool.status}
                       </span>
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                     {tool.description}
                   </p>
                 </div>
@@ -446,7 +451,7 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
                     ID: {tool.id.toUpperCase()}
                   </span>
                   
-                  <span className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-300 font-bold uppercase tracking-wider group-hover:translate-x-1 transition-transform">
+                  <span className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-405 font-bold uppercase tracking-wider group-hover:translate-x-1 transition-transform">
                     {tool.actionText}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </span>
