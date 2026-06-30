@@ -36,7 +36,10 @@ import { RecreationalFacilitiesRegistry } from "./resources/RecreationalFaciliti
 import { FacilitiesRegistry } from "./facilities/FacilitiesRegistry";
 import { AiAuditPanel } from "./analytics/AiAuditPanel";
 import { Sparkles, Library } from "lucide-react";
-import { ToolsHub } from "./dashboard/ToolsHub";import { EMISSetupRegistry } from "./registries/EMISSetupRegistry";
+import { ToolsHub } from "./dashboard/ToolsHub";
+import { EMISSetupRegistry } from "./registries/EMISSetupRegistry";
+import { SystemAdminDashboard } from "./dashboard/SystemAdminDashboard"; // ✅ IMPORT THE SYSTEM ADMIN DASHBOARD
+
 const ROLE_TO_SELECTED_TOOL: Record<string, string> = {
   PRIMARY: "primary_data",
   JUNIOR: "junior_secondary",
@@ -72,7 +75,13 @@ export const EduVisionPortal: React.FC = () => {
     setUserFirstLogin(user.firstLogin);
     setIsAuthenticated(true);
 
-    if (user.firstLogin && ROLE_TO_SELECTED_TOOL[normalizedRole]) {
+    // ✅ CHECK IF USER IS SUPER_ADMIN
+    if (normalizedRole === "SUPER_ADMIN") {
+      // Super Admin goes directly to System Admin Dashboard
+      setIsToolLaunched(true);
+      setSelectedTool("super_admin");
+      setActiveTab2("super_admin_dashboard");
+    } else if (user.firstLogin && ROLE_TO_SELECTED_TOOL[normalizedRole]) {
       setSelectedTool(ROLE_TO_SELECTED_TOOL[normalizedRole]);
       setActiveTab2("school");
       setIsToolLaunched(true);
@@ -102,6 +111,29 @@ export const EduVisionPortal: React.FC = () => {
     return <LandingPage onLogin={handleLogin} />;
   }
 
+  // ✅ CHECK FOR SUPER_ADMIN - SHOW SYSTEM ADMIN DASHBOARD
+  if (userRole === "SUPER_ADMIN" && isToolLaunched) {
+    return (
+      <div className={`min-h-screen ${isDark ? "dark bg-ink text-slate-100" : "bg-snow text-slate-900"} font-sans`}>
+        <div className="flex flex-col h-screen">
+          {/* Header with logout for Super Admin */}
+          <Header 
+            userName={userName}
+            userRole={userRole}
+            isDark={isDark}
+            setIsDark={setIsDark}
+            activeTab={activeTab}
+            onLogout={handleLogout}
+            onExit={() => setIsToolLaunched(false)}
+          />
+          <main className="flex-1 overflow-y-auto p-4 md:p-8">
+            <SystemAdminDashboard activeTab="system_admin" />
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   if (!isToolLaunched) {
     return (
       <ToolsHub
@@ -129,7 +161,7 @@ export const EduVisionPortal: React.FC = () => {
       case "ece_dashboard":
         return <EarlyChildhoodDashboard />;
       case "ece_school":
-        return <SchoolInfoRegistry toolType="EARLY" userRole={userRole} userSchoolId={userSchoolId} />;// Removed EarlyChildhoodSchoolInfo as requested and mapped to consolidated component
+        return <SchoolInfoRegistry toolType="EARLY" userRole={userRole} userSchoolId={userSchoolId} />;
       case "ece_students":
         return <EarlyChildhoodStudentsRegistry />;
       case "ece_transfers":
