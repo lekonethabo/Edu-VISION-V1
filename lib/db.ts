@@ -1,46 +1,52 @@
-import dotenv from "dotenv";
-import path from "node:path";
-import { PrismaClient } from "../generated/prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+// src/lib/db.ts
+import mysql from 'mysql2/promise';
 
-const root = process.cwd();
+// Get credentials from environment variables
+const {
+  DB_HOST,
+  DB_PORT,
+  DB_USER,
+  DB_PASSWORD,
+  DB_NAME,
+  DB_SSL_REJECT_UNAUTHORIZED = 'true'
+} = process.env;
 
-dotenv.config({ path: path.resolve(root, ".env.local") });
-dotenv.config({ path: path.resolve(root, ".env") });
-
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
+// Validate required environment variables
+if (!DB_HOST || !DB_USER || !DB_PASSWORD || !DB_NAME) {
   throw new Error(
-    "DATABASE_URL is not set. Ensure .env or .env.local contains the connection string."
+    'Missing required database environment variables. ' +
+    'Please check DB_HOST, DB_USER, DB_PASSWORD, and DB_NAME in .env.local'
   );
 }
 
-const dbUrl = new URL(databaseUrl);
-
-const dbAdapter = new PrismaMariaDb({
-  host: dbUrl.hostname,
-  port: dbUrl.port ? parseInt(dbUrl.port) : 3306,
-  user: dbUrl.username,
-  password: dbUrl.password,
-  database: dbUrl.pathname.substring(1),
-  connectTimeout: 10000,
+// Create connection pool
+const pool = mysql.createPool({
+  host: DB_HOST,
+  port: parseInt(DB_PORT || '11827'),
+  user: DB_USER,
+  password: DB_PASSWORD,
+  database: DB_NAME,
   ssl: {
-    rejectUnauthorized: false,
+    rejectUnauthorized: DB_SSL_REJECT_UNAUTHORIZED === 'true'
   },
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-const prismaClient = new PrismaClient({ adapter: dbAdapter });
+// Test connection on startup
+pool.getConnection()
+  .then(connection => {
+    console.log('✅ Database connected successfully to school_data_collection');
+    connection.release();
+  })
+  .catch(err => {
+    console.error('❌ Database connection failed:', err.message);
+  });
 
-declare global {
-  // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined;
+export async function query<T = any>(sql: string, params: any[] = []): Promise<T> {
+  const [rows] = await pool.execute(sql, params);
+  return rows as T;
 }
 
-export const prisma =
-  global.prisma ?? prismaClient;
-
-if (process.env.NODE_ENV !== "production") {
-  global.prisma = prisma;
-}
-
-export default prisma;
+export default pool;

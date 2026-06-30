@@ -1,3 +1,4 @@
+// src/app/auth/LandingPage.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -17,7 +18,7 @@ interface LandingPageProps {
   onLogin: (user: {
     regID: string;
     role: string;
-    schoolId?: string | null;
+    schoolId?: number | null;  // ✅ number, not string
     firstLogin: boolean;
     isActive: boolean;
   }) => void;
@@ -58,7 +59,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
   return (
     <div className="min-h-screen bg-snow flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-md w-full mx-auto space-y-8">
-
         {/* Header branding lockup */}
         <motion.div
           initial={{ opacity: 0, y: -16 }}
@@ -112,7 +112,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
           </AnimatePresence>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-
             {/* Field: Registration Number (Username) */}
             <div>
               <label
