@@ -1,12 +1,9 @@
-// src/app/login/actions.ts
+// src/app/auth/actions.ts
 'use server';
 
 import { findUserByUsername, updateLastLogin, isFirstLogin, getUserSchoolDetails } from '@/lib/auth/user';
 import { verifyPassword } from '@/lib/auth/password';
 import { cookies } from 'next/headers';
-
-// Session configuration
-const SESSION_DURATION = 60 * 60 * 24 * 7; // 7 days in seconds
 
 export interface LoginActionResult {
   success: boolean;
@@ -27,6 +24,8 @@ export async function loginAction(
   password: string
 ): Promise<LoginActionResult> {
   try {
+    console.log('🔐 Login attempt for:', username);
+
     // Validate input
     if (!username || !password) {
       return {
@@ -35,15 +34,18 @@ export async function loginAction(
       };
     }
 
-    // Find user by username (registration number)
+    // Find user
     const user = await findUserByUsername(username);
 
     if (!user) {
+      console.log('❌ User not found:', username);
       return {
         success: false,
         error: 'Invalid registration number or password.'
       };
     }
+
+    console.log('✅ User found:', user.username);
 
     // Check if user is active
     if (!user.is_active) {
@@ -57,26 +59,29 @@ export async function loginAction(
     const isPasswordValid = await verifyPassword(password, user.password_hash);
 
     if (!isPasswordValid) {
+      console.log('❌ Invalid password for:', username);
       return {
         success: false,
         error: 'Invalid registration number or password.'
       };
     }
 
-    // Update last login timestamp
+    console.log('✅ Password verified for:', username);
+
+    // Update last login
     await updateLastLogin(user.user_id);
 
     // Check if first login
     const firstLogin = await isFirstLogin(user);
 
-    // Get school details if user is associated with a school
+    // Get school details
     let schoolName: string | undefined;
     if (user.school_id) {
       const school = await getUserSchoolDetails(user.user_id);
       schoolName = school?.name;
     }
 
-    // Prepare user data for response
+    // Prepare user data
     const userData = {
       userId: user.user_id,
       regID: user.username,
@@ -89,8 +94,6 @@ export async function loginAction(
 
     // Set session cookie
     const cookieStore = await cookies();
-    
-    // Create session data
     const sessionData = JSON.stringify({
       userId: user.user_id,
       username: user.username,
@@ -102,19 +105,21 @@ export async function loginAction(
 
     cookieStore.set('session', sessionData, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Set to true in production
       sameSite: 'lax',
-      maxAge: SESSION_DURATION,
+      maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/'
     });
+
+    console.log('✅ Login successful for:', username);
 
     return {
       success: true,
       user: userData
     };
 
-  } catch (error) {
-    console.error('Login error:', error);
+  } catch (error: any) {
+    console.error('❌ Login error:', error.message);
     return {
       success: false,
       error: 'An unexpected error occurred. Please try again later.'
@@ -122,17 +127,11 @@ export async function loginAction(
   }
 }
 
-/**
- * Logout action - clear session
- */
 export async function logoutAction(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete('session');
 }
 
-/**
- * Get current session user
- */
 export async function getSessionUser() {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get('session');
@@ -146,12 +145,4 @@ export async function getSessionUser() {
   } catch {
     return null;
   }
-}
-
-/**
- * Check if user is authenticated
- */
-export async function isAuthenticated(): Promise<boolean> {
-  const session = await getSessionUser();
-  return session !== null;
 }

@@ -3,7 +3,7 @@ import { query } from '../db';
 
 export interface User {
   user_id: number;
-  username: string;        // This stores the school registration number
+  username: string;
   password_hash: string;
   email: string;
   full_name: string;
@@ -19,57 +19,45 @@ export interface User {
   deleted_at: Date | null;
 }
 
-export interface UserLoginResult {
-  success: boolean;
-  user?: {
-    userId: number;
-    regID: string;
-    role: string;
-    schoolId: number | null;
-    firstLogin: boolean;
-    isActive: boolean;
-  };
-  error?: string;
-}
-
-/**
- * Find a user by username (registration number)
- * Matches the users table in school_data_collection
- */
 export async function findUserByUsername(username: string): Promise<User | null> {
-  const users = await query<User[]>(
-    'SELECT * FROM users WHERE username = ? AND deleted_at IS NULL',
-    [username]
-  );
-  return users.length > 0 ? users[0] : null;
+  try {
+    const users = await query<User[]>(
+      'SELECT * FROM users WHERE username = ? AND deleted_at IS NULL',
+      [username]
+    );
+    return users.length > 0 ? users[0] : null;
+  } catch (error) {
+    console.error('Error finding user:', error);
+    return null;
+  }
 }
 
-/**
- * Update last login timestamp
- */
 export async function updateLastLogin(userId: number): Promise<void> {
-  await query(
-    'UPDATE users SET last_login_at = NOW() WHERE user_id = ?',
-    [userId]
-  );
+  try {
+    await query(
+      'UPDATE users SET last_login_at = NOW() WHERE user_id = ?',
+      [userId]
+    );
+  } catch (error) {
+    console.error('Error updating last login:', error);
+  }
 }
 
-/**
- * Check if user has first login (never logged in before)
- */
 export async function isFirstLogin(user: User): Promise<boolean> {
   return user.last_login_at === null;
 }
 
-/**
- * Get school details for a user
- */
 export async function getUserSchoolDetails(userId: number) {
-  const results = await query<any[]>(
-    `SELECT s.* FROM schools s
-     INNER JOIN users u ON u.school_id = s.school_id
-     WHERE u.user_id = ? AND s.deleted_at IS NULL`,
-    [userId]
-  );
-  return results.length > 0 ? results[0] : null;
+  try {
+    const results = await query<any[]>(
+      `SELECT s.* FROM schools s
+       INNER JOIN users u ON u.school_id = s.school_id
+       WHERE u.user_id = ? AND s.deleted_at IS NULL`,
+      [userId]
+    );
+    return results.length > 0 ? results[0] : null;
+  } catch (error) {
+    console.error('Error getting school details:', error);
+    return null;
+  }
 }
